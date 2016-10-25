@@ -1,19 +1,21 @@
-FROM quay.io/keboola/docker-base-php56:0.0.2
+FROM php:5.6
 MAINTAINER Erik Zigo <erik.zigo@keboola.com>
 
-# Install required tools
-RUN yum install -y wget
-RUN yum install -y tar
-RUN yum install -y openssl
-RUN yum -y --enablerepo=epel,remi,remi-php56 install php-devel
-RUN yum -y --enablerepo=epel,remi,remi-php56 install php-pear
-RUN yum -y --enablerepo=epel,remi,remi-php56 install php-mysql
+RUN apt-get update -q \
+  && apt-get install unzip git ssh -y --no-install-recommends
 
-WORKDIR /home
+RUN docker-php-ext-install pdo_mysql
 
-# Initialize
-COPY . /home/
-RUN composer install --no-interaction
+WORKDIR /root
+
+RUN curl -sS https://getcomposer.org/installer | php \
+  && mv composer.phar /usr/local/bin/composer
+
+COPY . /code
+
+WORKDIR /code
+
+RUN composer install --prefer-dist --no-interaction
 
 RUN curl --location --silent --show-error --fail \
         https://github.com/Barzahlen/waitforservices/releases/download/v0.3/waitforservices \
