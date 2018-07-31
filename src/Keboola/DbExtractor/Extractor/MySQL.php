@@ -100,6 +100,7 @@ class MySQL extends Extractor
         }
         $pdo->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
         $pdo->exec("SET NAMES utf8;");
+        $pdo->exec("SET wait_timeout=43200;");
 
         if ($isSsl) {
             $status = $pdo->query("SHOW STATUS LIKE 'Ssl_cipher';")->fetch(PDO::FETCH_ASSOC);
