@@ -19,7 +19,7 @@ class MySQLTest extends AbstractMySQLTest
         $config['action'] = 'testConnection';
         unset($config['parameters']['tables']);
         $config['parameters']['db']['networkCompression'] = true;
-
+        
         $app = $this->createApplication($config);
         $result = $app->run();
 
