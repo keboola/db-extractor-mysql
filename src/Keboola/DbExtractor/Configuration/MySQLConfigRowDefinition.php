@@ -34,7 +34,6 @@ class MySQLConfigRowDefinition extends ConfigRowDefinition
                         ->scalarNode('user')
                             ->isRequired()
                         ->end()
-                        ->scalarNode('password')->end()
                         ->scalarNode('#password')->end()
                         ->append($this->addSshNode())
                         ->append($this->addSslNode())
