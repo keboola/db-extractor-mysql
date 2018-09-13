@@ -12,6 +12,12 @@ services:
       MYSQL_DB_PASSWORD: rootpassword
       MYSQL_DB_DATABASE: test
       MYSQL_DB_PORT: 3306
+      TEST_RDS_USERNAME:
+      TEST_RDS_PASSWORD:
+      TEST_RDS_HOST:
+      TEST_RDS_ID:
+      TEST_RDS_ACCESS_KEY:
+      TEST_RDS_ACCESS_SECRET:
     links:
       - mysql
       - mysql:mysql-different-cn
@@ -29,12 +35,21 @@ services:
       MYSQL_DB_PASSWORD: rootpassword
       MYSQL_DB_DATABASE: test
       MYSQL_DB_PORT: 3307
+      TEST_RDS_USERNAME:
+      TEST_RDS_PASSWORD:
+      TEST_RDS_HOST:
+      TEST_RDS_ID:
+      TEST_RDS_ACCESS_KEY:
+      TEST_RDS_ACCESS_SECRET:
     links:
       - mysql8:mysql
       - mysql8:mysql-different-cn
       - sshproxy8:sshproxy
 
   dev:
+    build:
+      context: .
+      dockerfile: Dockerfile-tests    
     image: keboola/ex-db-mysql
     volumes:
       - .:/code
