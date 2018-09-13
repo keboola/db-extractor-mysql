@@ -54,7 +54,7 @@ class RetryTest extends AbstractMySQLTest
         $sourceFileName = $temp->getTmpFolder() . 'large.csv';
         $csv = new CsvFile($sourceFileName);
         $csv->writeRow(["usergender", "usercity", "usersentiment", "zipcode", "sku", "createdat", "category"]);
-        $rowCount = 200000;
+        $rowCount = 1000000;
         for ($i = 0; $i < $rowCount - 1; $i++) { // -1 for the header
             $csv->writeRow([uniqid('g'), "The Lakes", "1", "89124", "ZD111402", "2013-09-23 22:38:30", uniqid('c')]);
         }
