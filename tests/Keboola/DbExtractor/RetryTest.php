@@ -63,8 +63,8 @@ class RetryTest extends AbstractMySQLTest
         //var_export($output);
 
         // exec async
-        //exec('php ' . __DIR__ . '/../../killerRabbit.php 1 > /dev/null &');
-        exec('php ' . __DIR__ . '/../../killerRabbit.php 1 > NUL');
+        exec('php ' . __DIR__ . '/../../killerRabbit.php 1 > /dev/null &');
+        //exec('php ' . __DIR__ . '/../../killerRabbit.php 1 > NUL');
         $result = $app->run();
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv';
