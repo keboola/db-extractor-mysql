@@ -113,7 +113,7 @@ abstract class AbstractMySQLTest extends ExtractorTest
             )
         ));
 
-        $fileName = strtr((string)$file, '\\', "/");
+        $fileName = (string) $file;
         $query = "
 			LOAD DATA LOCAL INFILE '{$fileName}'
 			INTO TABLE `{$schemaName}`.`{$tableName}`

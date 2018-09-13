@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types = 1)
+
 require __DIR__ . '/../vendor/autoload.php';
 
 if (!isset($argv[1]) || (intval($argv[1]) != $argv[1])) {
