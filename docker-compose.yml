@@ -35,6 +35,9 @@ services:
       - sshproxy8:sshproxy
 
   dev:
+    build:
+      context: .
+      dockerfile: Dockerfile-tests    
     image: keboola/ex-db-mysql
     volumes:
       - .:/code

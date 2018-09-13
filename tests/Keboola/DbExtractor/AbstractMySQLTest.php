@@ -113,8 +113,9 @@ abstract class AbstractMySQLTest extends ExtractorTest
             )
         ));
 
+        $fileName = strtr((string)$file, '\\', "/");
         $query = "
-			LOAD DATA LOCAL INFILE '{$file}'
+			LOAD DATA LOCAL INFILE '{$fileName}'
 			INTO TABLE `{$schemaName}`.`{$tableName}`
 			CHARACTER SET utf8
 			FIELDS TERMINATED BY ','
