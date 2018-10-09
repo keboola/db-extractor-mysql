@@ -595,7 +595,6 @@ class MySqlExtractor extends BaseExtractor
 
     protected function handleDbError(\Throwable $e, ?TableParameters $table = null, ?int $counter = null): UserException
     {
-        var_dump($counter);
         $message = "";
         if ($table) {
             $message = sprintf("[%s]: ", $table->getOutputTable());
