@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
+use Keboola\Csv\CsvReader;
 
 class MySQLSSLTest extends AbstractMySQLTest
 {
@@ -31,7 +31,8 @@ class MySQLSSLTest extends AbstractMySQLTest
         $config['parameters']['tables'] = [];
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -48,30 +49,30 @@ class MySQLSSLTest extends AbstractMySQLTest
             'key' => file_get_contents($this->dataDir . '/mysql/ssl/client-key.pem'),
         ];
 
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
+
+        $csv2FilePath = $this->dataDir . '/mysql/escaping.csv';
+        $csv2 = new CsvReader($csv2FilePath);
+        $this->createTextTable($csv2, $csv2FilePath);
+
         $app = $this->createApplication($config);
-
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
-
-        $csv2 = new CsvFile($this->dataDir . '/mysql/escaping.csv');
-        $this->createTextTable($csv2);
-
-        $result = $app->run();
-
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv';
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest');
-        $this->assertFileEquals((string) $csv1, $outputCsvFile);
-
+        $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv';
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest');
-        $this->assertFileEquals((string) $csv2, $outputCsvFile);
+        $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 }

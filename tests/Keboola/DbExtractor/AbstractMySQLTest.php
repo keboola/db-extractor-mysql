@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\Exception\UserException;
-use Keboola\DbExtractor\Logger;
-use Keboola\DbExtractor\MySQLApplication;
-use Keboola\DbExtractor\Test\ExtractorTest;
+use Keboola\Component\Logger;
+use Keboola\Component\UserException;
+use Keboola\Csv\CsvReader;
+use Keboola\DbExtractorCommon\Tests\ExtractorTest;
+use Keboola\ExMySql\MySqlExtractor;
 use Symfony\Component\Filesystem\Filesystem;
 use PDO;
 
@@ -87,34 +87,22 @@ abstract class AbstractMySQLTest extends ExtractorTest
         $this->pdo->exec('INSERT INTO auto_increment_timestamp_withFK (`random_name`, `foreign_key`) VALUES (\'sue\',1)');
     }
 
-    public function getConfig(string $driver = self::DRIVER, string $format = self::CONFIG_FORMAT_YAML): array
+    public function getConfig(string $driver = self::DRIVER): array
     {
-        $config = parent::getConfig($driver, $format);
-        $config['parameters']['extractor_class'] = 'MySQL';
+        $config = parent::getConfig($driver);
         return $config;
     }
 
     public function getConfigRow(string $driver = self::DRIVER): array
     {
         $config = parent::getConfigRow($driver);
-        $config['parameters']['extractor_class'] = 'MySQL';
         return $config;
     }
 
-    protected function generateTableName(CsvFile $file): string
-    {
-        $tableName = sprintf(
-            '%s',
-            $file->getBasename('.' . $file->getExtension())
-        );
-
-        return $tableName;
-    }
-
-    protected function createTextTable(CsvFile $file, ?string $tableName = null, ?string $schemaName = null): void
+    protected function createTextTable(CsvReader $csvReader, string $filePath, ?string $tableName = null, ?string $schemaName = null): void
     {
         if (!$tableName) {
-            $tableName = $this->generateTableName($file);
+            $tableName = pathinfo($filePath, PATHINFO_FILENAME);
         }
 
         if (!$schemaName) {
@@ -137,12 +125,13 @@ abstract class AbstractMySQLTest extends ExtractorTest
                 ', ',
                 array_map(function ($column) {
                     return $column . ' text NULL';
-                }, $file->getHeader())
+                }, $csvReader->getHeader())
             )
         ));
 
+        $filePath = realpath($filePath);
         $query = "
-			LOAD DATA LOCAL INFILE '{$file}'
+			LOAD DATA LOCAL INFILE '{$filePath}'
 			INTO TABLE `{$schemaName}`.`{$tableName}`
 			CHARACTER SET utf8
 			FIELDS TERMINATED BY ','
@@ -154,19 +143,20 @@ abstract class AbstractMySQLTest extends ExtractorTest
         $this->pdo->exec($query);
 
         $count = $this->pdo->query(sprintf('SELECT COUNT(*) AS itemsCount FROM %s.%s', $schemaName, $tableName))->fetchColumn();
-        $this->assertEquals($this->countTable($file), (int) $count);
+        $this->assertEquals($this->countTable($csvReader), (int) $count);
     }
 
     /**
      * Count records in CSV (with headers)
      *
-     * @param CsvFile $file
+     * @param CsvReader $csvReader
+     *
      * @return int
      */
-    protected function countTable(CsvFile $file): int
+    protected function countTable(CsvReader $csvReader): int
     {
         $linesCount = 0;
-        foreach ($file as $i => $line) {
+        foreach ($csvReader as $i => $line) {
             // skip header
             if (!$i) {
                 continue;
@@ -178,28 +168,20 @@ abstract class AbstractMySQLTest extends ExtractorTest
         return $linesCount;
     }
 
-    public function createApplication(array $config, array $state = []): MySQLApplication
+    public function createApplication(array $config, array $state = []): MySqlExtractor
     {
-        $logger = new Logger('ex-db-mysql-tests');
-        $app = new MySQLApplication($config, $logger, $state, $this->dataDir);
-
+        putenv(sprintf('KBC_DATADIR=%s', $this->dataDir));
+        $this->prepareConfigInDataDir($config);
+        $app = new MySqlExtractor(new Logger());
+        $app->setState($state);
         return $app;
-    }
-
-    public function configTypesProvider(): array
-    {
-        return [
-            [self::CONFIG_FORMAT_YAML],
-            [self::CONFIG_FORMAT_JSON],
-        ];
     }
 
     public function configProvider(): array
     {
         $this->dataDir = __DIR__ . '/../../data';
         return [
-            [$this->getConfig(self::DRIVER, self::CONFIG_FORMAT_YAML)],
-            [$this->getConfig(self::DRIVER, self::CONFIG_FORMAT_JSON)],
+            [$this->getConfig(self::DRIVER)],
             [$this->getConfigRow()],
         ];
     }

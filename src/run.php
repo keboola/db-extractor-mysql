@@ -2,18 +2,16 @@
 
 declare(strict_types=1);
 
+use Keboola\Component\UserException;
+use Keboola\Component\Logger;
 use Keboola\DbExtractor\MySQLApplication;
-use Keboola\DbExtractor\Exception\ApplicationException;
-use Keboola\DbExtractor\Exception\UserException;
-use Keboola\DbExtractor\Logger;
-use Symfony\Component\Yaml\Yaml;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Monolog\Handler\NullHandler;
 
 require_once(dirname(__FILE__) . "/../vendor/autoload.php");
 
-$logger = new Logger('ex-db-mysql');
+$logger = new Logger();
 
 $runAction = true;
 
@@ -22,14 +20,12 @@ try {
 
     $arguments = getopt("d::", ["data::"]);
     if (!isset($arguments["data"])) {
-        throw new UserException('Data folder not set.');
+        throw new \Keboola\Component\UserException('Data folder not set.');
     }
 
-    if (file_exists($arguments["data"] . "/config.yml")) {
-        $config = Yaml::parse(
-            file_get_contents($arguments["data"] . "/config.yml")
-        );
-    } else if (file_exists($arguments["data"] . "/config.json")) {
+    putenv(sprintf("KBC_DATADIR=%s", $arguments['data']));
+
+    if (file_exists($arguments["data"] . "/config.json")) {
         $config = $jsonDecode->decode(
             file_get_contents($arguments["data"] . '/config.json'),
             JsonEncoder::FORMAT
@@ -48,31 +44,15 @@ try {
         );
     }
 
-    $app = new MySQLApplication(
-        $config,
-        $logger,
-        $inputState,
-        $arguments["data"]
-    );
-
-    if ($app['action'] !== 'run') {
-        $app['logger']->setHandlers(array(new NullHandler(Logger::INFO)));
+    if ($config['action'] !== 'run') {
+        $logger->setHandlers(array(new NullHandler(Logger::INFO)));
         $runAction = false;
     }
 
-    $result = $app->run();
+    $app = new \Keboola\ExMySql\MySqlExtractor($logger);
+    $app->run();
 
-    if (!$runAction) {
-        echo json_encode($result);
-    } else {
-        if (!empty($result['state'])) {
-            // write state
-            $outputStateFile = $arguments['data'] . '/out/state.json';
-            $jsonEncode = new \Symfony\Component\Serializer\Encoder\JsonEncode();
-            file_put_contents($outputStateFile, $jsonEncode->encode($result['state'], JsonEncoder::FORMAT));
-        }
-    }
-    $app['logger']->log('info', "Extractor finished successfully.");
+    $logger->log('info', "Extractor finished successfully.");
     exit(0);
 } catch (UserException $e) {
     $logger->log('error', $e->getMessage());

@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\Exception\UserException;
+use Keboola\Csv\CsvReader;
+use Keboola\DbExtractor\MySQLApplication;
+use Keboola\Component\UserException;
 use Nette\Utils;
 
 class MySQLTest extends AbstractMySQLTest
@@ -19,7 +20,8 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['db']['networkCompression'] = true;
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -33,7 +35,8 @@ class MySQLTest extends AbstractMySQLTest
         unset($config['parameters']['db']['database']);
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -46,35 +49,36 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['tables'] = [];
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
     }
 
-    /**
-     * @param $configType
-     * @dataProvider configTypesProvider
-     */
-    public function testRunMain(string $configType): void
+    public function testRunMain(): void
     {
-        $config = $this->getConfig(self::DRIVER, $configType);
+        $config = $this->getConfig(self::DRIVER);
         $app = $this->createApplication($config);
 
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
 
-        $csv2 = new CsvFile($this->dataDir . '/mysql/escaping.csv');
-        $this->createTextTable($csv2);
+        $csv2FilePath = $this->dataDir . '/mysql/escaping.csv';
+        $csv2 = new CsvReader($csv2FilePath);
+        $this->createTextTable($csv2, $csv2FilePath);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv';
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest');
-        $this->assertFileEquals((string) $csv1, $outputCsvFile);
+        $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv';
@@ -82,7 +86,7 @@ class MySQLTest extends AbstractMySQLTest
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest');
-        $this->assertFileEquals((string) $csv2, $outputCsvFile);
+        $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 
     public function testRunWithoutDatabase(): void
@@ -96,7 +100,8 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['tables'][1]['query'] = "SELECT * FROM test.escaping";
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -123,7 +128,8 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -143,15 +149,17 @@ class MySQLTest extends AbstractMySQLTest
             'localPort' => '23306',
         ];
 
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
+
+        $csv2FilePath = $this->dataDir . '/mysql/escaping.csv';
+        $csv2 = new CsvReader($csv2FilePath);
+        $this->createTextTable($csv2, $csv2FilePath);
+
         $app = $this->createApplication($config);
-
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
-
-        $csv2 = new CsvFile($this->dataDir . '/mysql/escaping.csv');
-        $this->createTextTable($csv2);
-
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $sanitizedTable = Utils\Strings::webalize($result['imported'][0]['outputTable'], '._');
         $outputCsvFile = $this->dataDir . '/out/tables/' . $sanitizedTable . '.csv';
@@ -159,7 +167,7 @@ class MySQLTest extends AbstractMySQLTest
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest');
-        $this->assertFileEquals((string) $csv1, $outputCsvFile);
+        $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
         $sanitizedTable = Utils\Strings::webalize($result['imported'][1]['outputTable'], '._');
         $outputCsvFile = $this->dataDir . '/out/tables/' . $sanitizedTable . '.csv';
@@ -167,18 +175,21 @@ class MySQLTest extends AbstractMySQLTest
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest');
-        $this->assertFileEquals((string) $csv2, $outputCsvFile);
+        $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 
     public function testUserException(): void
     {
-        $this->setExpectedException('Keboola\DbExtractor\Exception\UserException');
-
         $config = $this->getConfig('mysql');
-
         $config['parameters']['db']['host'] = 'nonexistinghost';
+
         $app = $this->createApplication($config);
 
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            '[in.c-main.sales]: DB query failed: SQLSTATE[HY000] [2002] php_network_getaddresses:'
+            . ' getaddrinfo failed: Name or service not known'
+        );
         $app->run();
     }
 
@@ -187,17 +198,20 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTable();
 
         // add a table to a different schema (should not be fetched)
+        $csvFilePath = $this->dataDir . '/mysql/sales.csv';
         $this->createTextTable(
-            new CsvFile($this->dataDir . '/mysql/sales.csv'),
+            new CsvReader($csvFilePath),
+            $csvFilePath,
             "ext_sales",
             "temp_schema"
         );
 
         $config = $this->getConfig();
         $config['action'] = 'getTables';
-        $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
@@ -241,8 +255,10 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTable();
 
         // add a table to a different schema
+        $csvFilePath = $this->dataDir . '/mysql/sales.csv';
         $this->createTextTable(
-            new CsvFile($this->dataDir . '/mysql/sales.csv'),
+            new CsvReader($csvFilePath),
+            $csvFilePath,
             "ext_sales",
             "temp_schema"
         );
@@ -251,9 +267,10 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['tables'] = [];
         unset($config['parameters']['db']['database']);
         $config['action'] = 'getTables';
-        $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertGreaterThanOrEqual(4, count($result['tables']));
 
@@ -323,8 +340,8 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTableWithFK();
 
         $app = $this->createApplication($config);
-
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $importedTable = ($isConfigRow) ? $result['imported']['outputTable'] : $result['imported'][0]['outputTable'];
 
@@ -585,8 +602,10 @@ class MySQLTest extends AbstractMySQLTest
 
     public function testSchemaNotEqualToDatabase(): void
     {
+        $csvPath = $this->dataDir . '/mysql/sales.csv';
         $this->createTextTable(
-            new CsvFile($this->dataDir . '/mysql/sales.csv'),
+            new CsvReader($csvPath),
+            $csvPath,
             "ext_sales",
             "temp_schema"
         );
@@ -601,7 +620,7 @@ class MySQLTest extends AbstractMySQLTest
             $app = $this->createApplication($config);
             $app->run();
             $this->fail('table schema and database mismatch');
-        } catch (\Keboola\DbExtractor\Exception\UserException $e) {
+        } catch (UserException $e) {
             $this->assertStringStartsWith("Invalid Configuration", $e->getMessage());
         }
     }
@@ -609,17 +628,20 @@ class MySQLTest extends AbstractMySQLTest
     public function testThousandsOfTables(): void
     {
         $this->markTestSkipped("No need to run this test every time.");
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
 
         for ($i = 0; $i < 3500; $i++) {
-            $this->createTextTable($csv1, "sales_" . $i);
+            $this->createTextTable($csv1, $csv1FilePath, "sales_" . $i);
         }
 
         $config = $this->getConfig();
         $config['action'] = 'getTables';
-        $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
+
         echo "\nThere are " . count($result['tables']) . " tables\n";
     }
 
@@ -628,7 +650,9 @@ class MySQLTest extends AbstractMySQLTest
         $config = $this->getIncrementalFetchingConfig();
         $this->createAutoIncrementAndTimestampTable();
 
-        $result = ($this->createApplication($config))->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -645,11 +669,242 @@ class MySQLTest extends AbstractMySQLTest
         $this->assertEquals(['weird_I_d'], $manifest['primary_key']);
     }
 
+    public function testIncrementalFetchingByTimestamp(): void
+    {
+        $config = $this->getIncrementalFetchingConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'timestamp';
+        $this->createAutoIncrementAndTimestampTable();
+
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
+
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertNotEmpty($result['state']['lastFetchedRow']);
+
+        sleep(2);
+        // the next fetch should be empty
+        $app = $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $emptyResult = json_decode($stdout, true);
+
+        $this->assertEquals(0, $emptyResult['imported']['rows']);
+
+        sleep(2);
+        //now add a couple rows and run it again.
+        $this->pdo->exec('INSERT INTO auto_increment_timestamp (`weird-Name`) VALUES (\'charles\'), (\'william\')');
+
+        $app = $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $newResult = json_decode($stdout, true);
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertGreaterThan(
+            $result['state']['lastFetchedRow'],
+            $newResult['state']['lastFetchedRow']
+        );
+        $this->assertEquals(2, $newResult['imported']['rows']);
+    }
+
+    public function testIncrementalFetchingByDatetime(): void
+    {
+        $config = $this->getIncrementalFetchingConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'datetime';
+        $config['parameters']['table']['tableName'] = 'auto_increment_timestamp_withFK';
+        $config['parameters']['outputTable'] = 'in.c-main.auto-increment-timestamp-with-fk';
+        $this->createAutoIncrementAndTimestampTable();
+        $this->createAutoIncrementAndTimestampTableWithFK();
+
+        $result = ($this->createApplication($config))->run();
+
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp-with-fk',
+                'rows' => 1,
+            ],
+            $result['imported']
+        );
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertNotEmpty($result['state']['lastFetchedRow']);
+
+        sleep(2);
+        // the next fetch should be empty
+        $emptyResult = ($this->createApplication($config, $result['state']))->run();
+        $this->assertEquals(0, $emptyResult['imported']['rows']);
+
+        sleep(2);
+        //now add a couple rows and run it again.
+        $this->pdo->exec('INSERT INTO auto_increment_timestamp_withFK (`random_name`) VALUES (\'charles\'), (\'william\')');
+
+        $newResult = ($this->createApplication($config, $result['state']))->run();
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertGreaterThan(
+            $result['state']['lastFetchedRow'],
+            $newResult['state']['lastFetchedRow']
+        );
+        $this->assertEquals(2, $newResult['imported']['rows']);
+    }
+
+    public function testIncrementalFetchingByAutoIncrement(): void
+    {
+        $config = $this->getIncrementalFetchingConfig();
+        $config['parameters']['incrementalFetchingColumn'] = '_weird-I-d';
+        $this->createAutoIncrementAndTimestampTable();
+
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
+
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 2,
+            ],
+            $result['imported']
+        );
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertEquals(2, $result['state']['lastFetchedRow']);
+
+        sleep(2);
+        // the next fetch should be empty
+        $app = $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $emptyResult = json_decode($stdout, true);
+
+        $this->assertEquals(0, $emptyResult['imported']['rows']);
+
+        sleep(2);
+        //now add a couple rows and run it again.
+        $this->pdo->exec('INSERT INTO auto_increment_timestamp (`weird-Name`) VALUES (\'charles\'), (\'william\')');
+
+        $app = $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $newResult = json_decode($stdout, true);
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $newResult);
+        $this->assertArrayHasKey('lastFetchedRow', $newResult['state']);
+        $this->assertEquals(4, $newResult['state']['lastFetchedRow']);
+        $this->assertEquals(2, $newResult['imported']['rows']);
+    }
+
+    public function testIncrementalFetchingLimit(): void
+    {
+        $config = $this->getIncrementalFetchingConfig();
+        $config['parameters']['incrementalFetchingLimit'] = 1;
+        $this->createAutoIncrementAndTimestampTable();
+
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
+
+        $this->assertEquals('success', $result['status']);
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 1,
+            ],
+            $result['imported']
+        );
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertEquals(1, $result['state']['lastFetchedRow']);
+
+        sleep(2);
+        // the next fetch should contain the second row
+        $app = $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
+
+        $this->assertEquals(
+            [
+                'outputTable' => 'in.c-main.auto-increment-timestamp',
+                'rows' => 1,
+            ],
+            $result['imported']
+        );
+
+        //check that output state contains expected information
+        $this->assertArrayHasKey('state', $result);
+        $this->assertArrayHasKey('lastFetchedRow', $result['state']);
+        $this->assertEquals(2, $result['state']['lastFetchedRow']);
+    }
+
+
+    public function testIncrementalFetchingInvalidColumns(): void
+    {
+        $this->createAutoIncrementAndTimestampTable();
+        $config = $this->getIncrementalFetchingConfig();
+        $config['parameters']['incrementalFetchingColumn'] = 'fakeCol'; // column does not exist
+
+        try {
+            $result = ($this->createApplication($config))->run();
+            $this->fail('specified autoIncrement column does not exist, should fail.');
+        } catch (UserException $e) {
+            $this->assertStringStartsWith("Column [fakeCol]", $e->getMessage());
+        }
+
+        // column exists but is not auto-increment nor updating timestamp so should fail
+        $config['parameters']['incrementalFetchingColumn'] = 'weird-Name';
+        try {
+            $result = ($this->createApplication($config))->run();
+            $this->fail('specified column is not auto increment nor timestamp, should fail.');
+        } catch (UserException $e) {
+            $this->assertStringStartsWith("Column [weird-Name] specified for incremental fetching", $e->getMessage());
+        }
+    }
+
+    public function testIncrementalFetchingInvalidConfig(): void
+    {
+        $this->createAutoIncrementAndTimestampTable();
+        $config = $this->getIncrementalFetchingConfig();
+        $config['parameters']['query'] = 'SELECT * FROM auto_increment_timestamp';
+        unset($config['parameters']['table']);
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            'Invalid configuration for path "root.parameters":'
+            . ' Incremental fetching is not supported for advanced queries.'
+        );
+        $this->createApplication($config);
+    }
+
     public function testRunWithNetworkCompression(): void
     {
         $config = $this->getIncrementalFetchingConfig();
         $config['parameters']['db']['networkCompression'] = true;
-        $result = ($this->createApplication($config))->run();
+
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = json_decode($stdout, true);
+
+
         $this->assertEquals(
             [
                 'outputTable' => 'in.c-main.auto-increment-timestamp',

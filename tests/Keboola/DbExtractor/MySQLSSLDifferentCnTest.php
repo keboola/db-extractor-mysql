@@ -2,19 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
 
-use Keboola\DbExtractor\Exception\UserException;
+use Keboola\Component\UserException;
 
 class MySQLSSLDifferentCnTest extends AbstractMySQLTest
 {
     public function testCredentials(): void
     {
-        $this->setExpectedException(
-            UserException::class,
-            'Peer certificate CN=`mysql\' did not match expected CN=`mysql-different-cn'
-        );
-
         $config = $this->getConfig();
         $config['action'] = 'testConnection';
 
@@ -29,7 +24,11 @@ class MySQLSSLDifferentCnTest extends AbstractMySQLTest
 
         $config['parameters']['db']['host'] = 'mysql-different-cn';
 
-        $this->createApplication($config)->run();
+        $app = $this->createApplication($config);
+
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Peer certificate CN=`mysql\' did not match expected CN=`mysql-different-cn');
+        $app->run();
     }
 
     public function testConfigRowServerCertOption(): void
