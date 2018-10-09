@@ -43,6 +43,7 @@ class BaseConfigDefinition extends BaseExtractorConfigDefinition
     public function getSslNode(): ArrayNodeDefinition
     {
         $builder = new TreeBuilder();
+        /** @var ArrayNodeDefinition $node */
         $node = $builder->root('ssl');
 
         // @formatter:off

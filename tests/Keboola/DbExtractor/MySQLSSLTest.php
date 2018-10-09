@@ -10,7 +10,9 @@ class MySQLSSLTest extends AbstractMySQLTest
 {
     public function testSSLEnabled(): void
     {
-        $status = $this->pdo->query("SHOW STATUS LIKE 'Ssl_cipher';")->fetch(\PDO::FETCH_ASSOC);
+        /** @var \PDOStatement $stmt */
+        $stmt = $this->pdo->query("SHOW STATUS LIKE 'Ssl_cipher';");
+        $status = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         $this->assertArrayHasKey('Value', $status);
         $this->assertNotEmpty($status['Value']);
@@ -65,14 +67,18 @@ class MySQLSSLTest extends AbstractMySQLTest
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
-        $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest');
+        $this->assertFileExists(
+            $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest'
+        );
         $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv';
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
-        $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest');
+        $this->assertFileExists(
+            $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest'
+        );
         $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 }

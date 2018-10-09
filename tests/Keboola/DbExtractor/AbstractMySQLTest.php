@@ -84,7 +84,9 @@ abstract class AbstractMySQLTest extends ExtractorTest
             PRIMARY KEY (`some_primary_key`),
             FOREIGN KEY (`foreign_key`) REFERENCES auto_increment_timestamp (`_weird-I-d`) ON DELETE CASCADE 
         ) COMMENT=\'This is a table comment\'');
-        $this->pdo->exec('INSERT INTO auto_increment_timestamp_withFK (`random_name`, `foreign_key`) VALUES (\'sue\',1)');
+        $this->pdo->exec(
+            'INSERT INTO auto_increment_timestamp_withFK (`random_name`, `foreign_key`) VALUES (\'sue\',1)'
+        );
     }
 
     public function getConfig(string $driver = self::DRIVER): array
@@ -99,8 +101,12 @@ abstract class AbstractMySQLTest extends ExtractorTest
         return $config;
     }
 
-    protected function createTextTable(CsvReader $csvReader, string $filePath, ?string $tableName = null, ?string $schemaName = null): void
-    {
+    protected function createTextTable(
+        CsvReader $csvReader,
+        string $filePath,
+        ?string $tableName = null,
+        ?string $schemaName = null
+    ): void {
         if (!$tableName) {
             $tableName = pathinfo($filePath, PATHINFO_FILENAME);
         }
@@ -142,7 +148,9 @@ abstract class AbstractMySQLTest extends ExtractorTest
 
         $this->pdo->exec($query);
 
-        $count = $this->pdo->query(sprintf('SELECT COUNT(*) AS itemsCount FROM %s.%s', $schemaName, $tableName))->fetchColumn();
+        /** @var \PDOStatement $stmt */
+        $stmt = $this->pdo->query(sprintf('SELECT COUNT(*) AS itemsCount FROM %s.%s', $schemaName, $tableName));
+        $count = $stmt->fetchColumn();
         $this->assertEquals($this->countTable($csvReader), (int) $count);
     }
 

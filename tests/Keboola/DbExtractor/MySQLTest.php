@@ -77,7 +77,9 @@ class MySQLTest extends AbstractMySQLTest
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
-        $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest');
+        $this->assertFileExists(
+            $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest'
+        );
         $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
 
@@ -85,7 +87,9 @@ class MySQLTest extends AbstractMySQLTest
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
-        $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest');
+        $this->assertFileExists(
+            $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest'
+        );
         $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 
@@ -347,7 +351,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $sanitizedTable = Utils\Strings::webalize($importedTable, '._');
         $outputManifest = json_decode(
-            file_get_contents($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest'),
+            (string) file_get_contents($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest'),
             true
         );
 
@@ -864,7 +868,8 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['incrementalFetchingColumn'] = 'fakeCol'; // column does not exist
 
         try {
-            $result = ($this->createApplication($config))->run();
+            $app = $this->createApplication($config);
+            $app->run();
             $this->fail('specified autoIncrement column does not exist, should fail.');
         } catch (UserException $e) {
             $this->assertStringStartsWith("Column [fakeCol]", $e->getMessage());
@@ -873,7 +878,8 @@ class MySQLTest extends AbstractMySQLTest
         // column exists but is not auto-increment nor updating timestamp so should fail
         $config['parameters']['incrementalFetchingColumn'] = 'weird-Name';
         try {
-            $result = ($this->createApplication($config))->run();
+            $app = $this->createApplication($config);
+            $app->run();
             $this->fail('specified column is not auto increment nor timestamp, should fail.');
         } catch (UserException $e) {
             $this->assertStringStartsWith("Column [weird-Name] specified for incremental fetching", $e->getMessage());

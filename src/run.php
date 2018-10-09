@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use Keboola\Component\UserException;
 use Keboola\Component\Logger;
-use Keboola\DbExtractor\MySQLApplication;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Monolog\Handler\NullHandler;
@@ -19,15 +18,15 @@ try {
     $jsonDecode = new JsonDecode(true);
 
     $arguments = getopt("d::", ["data::"]);
-    if (!isset($arguments["data"])) {
+    if (!isset($arguments["data"]) || !is_string($arguments['data'])) {
         throw new \Keboola\Component\UserException('Data folder not set.');
     }
+    $dataDir = $arguments['data'];
+    putenv(sprintf("KBC_DATADIR=%s", $dataDir));
 
-    putenv(sprintf("KBC_DATADIR=%s", $arguments['data']));
-
-    if (file_exists($arguments["data"] . "/config.json")) {
+    if (file_exists($dataDir . "/config.json")) {
         $config = $jsonDecode->decode(
-            file_get_contents($arguments["data"] . '/config.json'),
+            (string) file_get_contents($dataDir . '/config.json'),
             JsonEncoder::FORMAT
         );
     } else {
@@ -36,10 +35,10 @@ try {
 
     // get the state
     $inputState = [];
-    $inputStateFile = $arguments['data'] . '/in/state.json';
+    $inputStateFile = $dataDir . '/in/state.json';
     if (file_exists($inputStateFile)) {
         $inputState = $jsonDecode->decode(
-            file_get_contents($inputStateFile),
+            (string) file_get_contents($inputStateFile),
             JsonEncoder::FORMAT
         );
     }

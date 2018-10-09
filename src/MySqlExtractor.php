@@ -25,7 +25,7 @@ class MySqlExtractor extends BaseExtractor
     public const TYPE_TIMESTAMP = 'timestamp';
 
     /**
-     * @var \PDO
+     * @var \PDO|null
      */
     private $db;
 
@@ -78,7 +78,9 @@ class MySqlExtractor extends BaseExtractor
     {
         /** @var Config $config */
         $config = $this->getConfig();
-        if ($table->getTableDetail() && $config->getDbParameters()->getDatabase() !== $table->getTableDetail()->getSchema()) {
+        if ($table->getTableDetail()
+            && $config->getDbParameters()->getDatabase() !== $table->getTableDetail()->getSchema()
+        ) {
             throw new UserException(sprintf(
                 'Invalid Configuration in "%s".  The table schema "%s" is different from the connection database "%s"',
                 $table->getOutputTable(),
@@ -190,7 +192,9 @@ class MySqlExtractor extends BaseExtractor
 
         $sql .= $whereClause;
 
+        /** @var \PDOStatement $res */
         $res = $this->getConnection()->query($sql);
+        /** @var array $arr */
         $arr = $res->fetchAll(\PDO::FETCH_ASSOC);
         if (count($arr) === 0) {
             return [];
@@ -218,7 +222,9 @@ class MySqlExtractor extends BaseExtractor
         $sql = "SELECT c.* FROM INFORMATION_SCHEMA.COLUMNS as c";
         $sql .= $whereClause;
 
+        /** @var \PDOStatement $res */
         $res = $this->db->query($sql);
+        /** @var array $rows */
         $rows = $res->fetchAll(\PDO::FETCH_ASSOC);
 
         foreach ($rows as $i => $column) {
@@ -251,7 +257,9 @@ class MySqlExtractor extends BaseExtractor
                 if ($column['EXTRA'] === 'auto_increment' && isset($tableDefs[$curTable]['autoIncrement'])) {
                     $curColumn['autoIncrement'] = $tableDefs[$curTable]['autoIncrement'];
                 }
-                if ($column['EXTRA'] === 'on update CURRENT_TIMESTAMP' && $column['COLUMN_DEFAULT'] === 'CURRENT_TIMESTAMP') {
+                if ($column['EXTRA'] === 'on update CURRENT_TIMESTAMP'
+                    && $column['COLUMN_DEFAULT'] === 'CURRENT_TIMESTAMP'
+                ) {
                     $tableDefs[$curTable]['timestampUpdateColumn'] = $column['COLUMN_NAME'];
                 }
             }
@@ -265,7 +273,9 @@ class MySqlExtractor extends BaseExtractor
                     CONSTRAINT_NAME, REFERENCED_TABLE_NAME, LOWER(REFERENCED_COLUMN_NAME) as REFERENCED_COLUMN_NAME, 
                     REFERENCED_TABLE_SCHEMA FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS c ";
 
+            /** @var \PDOStatement $res */
             $res = $this->db->query($additionalSql . $whereClause);
+            /** @var array $rows */
             $rows = $res->fetchAll(\PDO::FETCH_ASSOC);
             foreach ($rows as $column) {
                 $curColumn = [];
@@ -279,12 +289,15 @@ class MySqlExtractor extends BaseExtractor
                 }
                 if (count($curColumn) > 0) {
                     $curTableName = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
-                    $filteredColumns = array_filter(
-                        $tableDefs[$curTableName]['columns'],
-                        function ($existingCol) use ($column) {
-                            return $existingCol['name'] === $column['COLUMN_NAME'];
-                        }
-                    );
+                    $filteredColumns = [];
+                    if (isset($tableDefs[$curTableName]['columns'])) {
+                        $filteredColumns = array_filter(
+                            $tableDefs[$curTableName]['columns'],
+                            function ($existingCol) use ($column) {
+                                return $existingCol['name'] === $column['COLUMN_NAME'];
+                            }
+                        );
+                    }
                     if (count($filteredColumns) === 0) {
                         throw new ApplicationException(
                             sprintf(
@@ -306,7 +319,9 @@ class MySqlExtractor extends BaseExtractor
     public function testConnection(): void
     {
         $db = $this->getConnection();
-        $db->query('SELECT NOW();')->execute();
+        /** @var \PDOStatement $stmt */
+        $stmt = $db->query('SELECT NOW();');
+        $stmt->execute();
     }
 
     public function createConnection(Config $config): \PDO
@@ -372,7 +387,8 @@ class MySqlExtractor extends BaseExtractor
                 }
             };
             $checkCnMismatch($e);
-            if (($previous = $e->getPrevious()) !== null) {
+            $previous = $e->getPrevious();
+            if ($previous !== null) {
                 $checkCnMismatch($previous);
             }
             throw $e;
@@ -381,7 +397,9 @@ class MySqlExtractor extends BaseExtractor
         $pdo->exec("SET NAMES utf8;");
 
         if ($isSsl) {
-            $status = $pdo->query("SHOW STATUS LIKE 'Ssl_cipher';")->fetch(\PDO::FETCH_ASSOC);
+            /** @var \PDOStatement $stmt */
+            $stmt = $pdo->query("SHOW STATUS LIKE 'Ssl_cipher';");
+            $status = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (empty($status['Value'])) {
                 throw new UserException(sprintf("Connection is not encrypted"));
@@ -391,7 +409,9 @@ class MySqlExtractor extends BaseExtractor
         }
 
         if ($config->isNetworkCompression()) {
-            $status = $pdo->query("SHOW SESSION STATUS LIKE 'Compression';")->fetch(\PDO::FETCH_ASSOC);
+            /** @var \PDOStatement $stmt */
+            $stmt = $pdo->query("SHOW SESSION STATUS LIKE 'Compression';");
+            $status = $stmt->fetch(\PDO::FETCH_ASSOC);
 
             if (empty($status['Value']) || $status['Value'] !== 'ON') {
                 throw new UserException(sprintf("Network communication is not compressed"));
@@ -407,7 +427,7 @@ class MySqlExtractor extends BaseExtractor
     {
         $filename = $temp->createTmpFile('ssl');
         file_put_contents((string) $filename, $sslCa);
-        return realpath((string) $filename);
+        return (string) realpath((string) $filename);
     }
 
     public function getConnection(): \PDO
@@ -427,6 +447,7 @@ class MySqlExtractor extends BaseExtractor
         ?int $limit = null
     ): void {
         $db = $this->getConnection();
+        /** @var \PDOStatement $res */
         $res = $db->query(
             sprintf(
                 'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
@@ -436,6 +457,7 @@ class MySqlExtractor extends BaseExtractor
                 $db->quote($columnName)
             )
         );
+        /** @var array $columns */
         $columns = $res->fetchAll();
         if (count($columns) === 0) {
             throw new UserException(
@@ -454,7 +476,8 @@ class MySqlExtractor extends BaseExtractor
         } else {
             throw new UserException(
                 sprintf(
-                    'Column [%s] specified for incremental fetching is not an auto increment column or an auto update timestamp',
+                    'Column [%s] specified for incremental fetching is not'
+                    . ' an auto increment column or an auto update timestamp',
                     $columnName
                 )
             );
