@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
 use Keboola\Component\UserException;
 

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
 use Keboola\Component\Logger;
 use Keboola\Component\UserException;
 use Keboola\Csv\CsvReader;
 use Keboola\DbExtractorCommon\Tests\ExtractorTest;
-use Keboola\ExMySql\MySqlExtractor;
+use Keboola\MysqlExtractor\MySqlExtractor;
 use Symfony\Component\Filesystem\Filesystem;
 use PDO;
 

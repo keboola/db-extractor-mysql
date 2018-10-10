@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql;
+namespace Keboola\MysqlExtractor;
 
 use Keboola\Component\UserException;
 use Keboola\Csv\CsvWriter;
@@ -13,13 +13,13 @@ use Keboola\DbExtractorCommon\Configuration\TableParameters;
 use Keboola\DbExtractorCommon\Exception\ApplicationException;
 use Keboola\DbExtractorCommon\Exception\DeadConnectionException;
 use Keboola\DbExtractorCommon\RetryProxy;
-use Keboola\ExMySql\Configuration\Config;
-use Keboola\ExMySql\Configuration\Definition\MySQLConfigActionDefinition;
-use Keboola\ExMySql\Configuration\Definition\MySQLConfigDefinition;
-use Keboola\ExMySql\Configuration\Definition\MySQLConfigRowDefinition;
+use Keboola\MysqlExtractor\Configuration\Config;
+use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigActionDefinition;
+use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigDefinition;
+use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigRowDefinition;
 use Keboola\Temp\Temp;
 
-class MySqlExtractor extends BaseExtractor
+class MysqlExtractor extends BaseExtractor
 {
     public const TYPE_AUTO_INCREMENT = 'autoIncrement';
     public const TYPE_TIMESTAMP = 'timestamp';

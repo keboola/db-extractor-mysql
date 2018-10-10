@@ -2,13 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
 use Keboola\Csv\CsvReader;
 use Symfony\Component\Filesystem;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
 
 class MySQLEntrypointTest extends AbstractMySQLTest
 {

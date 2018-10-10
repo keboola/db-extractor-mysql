@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql\Configuration\Definition;
+namespace Keboola\MysqlExtractor\Configuration\Definition;
 
 use Keboola\DbExtractorCommon\Configuration\Definition\BaseExtractorConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;

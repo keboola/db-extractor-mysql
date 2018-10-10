@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql\Tests\Keboola\DbExtractor;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
 use Keboola\Csv\CsvReader;
-use Keboola\DbExtractor\MySQLApplication;
 use Keboola\Component\UserException;
 use Nette\Utils;
 
@@ -191,7 +190,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $this->expectException(UserException::class);
         $this->expectExceptionMessage(
-            '[in.c-main.sales]: DB query failed: SQLSTATE[HY000] [2002] php_network_getaddresses:'
+            'DB query failed: SQLSTATE[HY000] [2002] php_network_getaddresses:'
             . ' getaddrinfo failed: Name or service not known'
         );
         $app->run();

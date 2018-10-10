@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\ExMySql\Configuration;
+namespace Keboola\MysqlExtractor\Configuration;
 
 class SslParameters
 {

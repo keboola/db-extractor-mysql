@@ -22,12 +22,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Keboola\\ExMySql\\": "src/"
+            "Keboola\\MysqlExtractor\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Keboola\\ExMySql\\Tests\\": "tests/"
+            "Keboola\\MysqlExtractor\\Tests\\": "tests/"
         }
     },
     "scripts": {
