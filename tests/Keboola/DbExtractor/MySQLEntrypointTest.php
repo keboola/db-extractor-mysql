@@ -13,7 +13,6 @@ class MySQLEntrypointTest extends AbstractMySQLTest
     /** @var string */
     protected $rootPath = __DIR__ . '/../../..';
 
-
     public function testRunAction(): void
     {
         $outputCsvFile = $this->dataDir . '/out/tables/in.c-main.sales.csv';
@@ -35,7 +34,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $csv2 = new CsvReader($csv2FilePath);
         $this->createTextTable($csv2, $csv2FilePath);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -58,7 +58,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config['action'] = 'testConnection';
         file_put_contents($this->dataDir . '/config.json', json_encode($config));
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
         $this->assertJson($process->getOutput());
@@ -85,7 +86,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         ];
         file_put_contents($this->dataDir . '/config.json', json_encode($config));
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
         $this->assertJson($process->getOutput());
@@ -100,7 +102,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         @unlink($this->dataDir . '/config.json');
         file_put_contents($this->dataDir . '/config.json', json_encode($config));
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -125,7 +128,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $csv1 = new CsvReader($csv1FilePath);
         $this->createTextTable($csv1, $csv1FilePath);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -152,7 +156,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
 
         // try exporting before the table exists
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->start();
 
@@ -195,7 +200,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
 
         file_put_contents($this->dataDir . '/config.json', json_encode($config));
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -240,7 +246,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
 
         file_put_contents($this->dataDir . '/config.json', json_encode($config));
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -260,7 +267,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         file_put_contents($inputStateFile, file_get_contents($outputStateFile));
 
         // run the config again
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 

@@ -15,14 +15,8 @@ $logger = new Logger();
 $runAction = true;
 
 try {
+    $dataDir = getenv('KBC_DATADIR') ?? '/data';
     $jsonDecode = new JsonDecode(true);
-
-    $arguments = getopt("d::", ["data::"]);
-    if (!isset($arguments["data"]) || !is_string($arguments['data'])) {
-        throw new \Keboola\Component\UserException('Data folder not set.');
-    }
-    $dataDir = $arguments['data'];
-    putenv(sprintf("KBC_DATADIR=%s", $dataDir));
 
     if (file_exists($dataDir . "/config.json")) {
         $config = $jsonDecode->decode(
