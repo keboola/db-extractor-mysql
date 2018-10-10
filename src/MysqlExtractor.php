@@ -41,10 +41,10 @@ class MysqlExtractor extends BaseExtractor
     {
         if ($action !== 'run') {
             return MySQLConfigActionDefinition::class;
-        } elseif (!$isConfigRow) {
-            return MySQLConfigDefinition::class;
-        } else {
+        } elseif ($isConfigRow) {
             return MySQLConfigRowDefinition::class;
+        } else {
+            return MySQLConfigDefinition::class;
         }
     }
 
@@ -52,12 +52,7 @@ class MysqlExtractor extends BaseExtractor
     {
         $imported = [];
         $outputState = [];
-        if (!$config->isConfigRow()) {
-            foreach ($config->getEnabledTables() as $table) {
-                $exportResults = $this->extractTable($table);
-                $imported[] = $exportResults;
-            }
-        } else {
+        if ($config->isConfigRow()) {
             $tableParameters = TableParameters::fromRaw($config->getParameters());
             $exportResults = $this->extractTable($tableParameters);
             if (isset($exportResults['state'])) {
@@ -65,6 +60,11 @@ class MysqlExtractor extends BaseExtractor
                 unset($exportResults['state']);
             }
             $imported = $exportResults;
+        } else {
+            foreach ($config->getEnabledTables() as $table) {
+                $exportResults = $this->extractTable($table);
+                $imported[] = $exportResults;
+            }
         }
 
         return [
