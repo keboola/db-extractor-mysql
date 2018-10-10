@@ -18,20 +18,20 @@ class SslParameters
     /** @var string */
     private $key;
 
-    /** @var string|null */
-    private $cipher;
-
     /** @var bool */
     private $verifyServerCert;
 
-    public function __construct(array $sslParameters)
+    /** @var string|null */
+    private $cipher;
+
+    public function __construct(bool $enabled, string $ca, string $cert, string $key, bool $verifyServerCert, ?string $cipher = null)
     {
-        $this->enabled = $sslParameters['enabled'];
-        $this->ca = $sslParameters['ca'];
-        $this->cert = $sslParameters['cert'];
-        $this->key = $sslParameters['key'];
-        $this->cipher = $sslParameters['cipher'] ?? null;
-        $this->verifyServerCert = $sslParameters['verifyServerCert'];
+        $this->enabled = $enabled;
+        $this->ca = $ca;
+        $this->cert = $cert;
+        $this->key = $key;
+        $this->verifyServerCert = $verifyServerCert;
+        $this->cipher = $cipher;
     }
 
     public function isEnabled(): bool
@@ -64,8 +64,15 @@ class SslParameters
         return $this->verifyServerCert;
     }
 
-    public static function fromRaw(array $sslParameters): SslParameters
+    public static function fromArray(array $sslParameters): SslParameters
     {
-        return new SslParameters($sslParameters);
+        return new SslParameters(
+            $sslParameters['enabled'],
+            $sslParameters['ca'],
+            $sslParameters['cert'],
+            $sslParameters['key'],
+            $sslParameters['verifyServerCert'],
+            $sslParameters['cipher'] ?? null
+        );
     }
 }
