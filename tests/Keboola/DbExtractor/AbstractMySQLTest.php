@@ -8,7 +8,7 @@ use Keboola\Component\Logger;
 use Keboola\Component\UserException;
 use Keboola\Csv\CsvReader;
 use Keboola\DbExtractorCommon\Tests\ExtractorTest;
-use Keboola\MysqlExtractor\MySqlExtractor;
+use Keboola\MysqlExtractor\MysqlExtractor;
 use Symfony\Component\Filesystem\Filesystem;
 use PDO;
 
@@ -176,11 +176,11 @@ abstract class AbstractMySQLTest extends ExtractorTest
         return $linesCount;
     }
 
-    public function createApplication(array $config, array $state = []): MySqlExtractor
+    public function createApplication(array $config, array $state = []): MysqlExtractor
     {
         putenv(sprintf('KBC_DATADIR=%s', $this->dataDir));
         $this->prepareConfigInDataDir($config);
-        $app = new MySqlExtractor(new Logger());
+        $app = new MysqlExtractor(new Logger());
         $app->setState($state);
         return $app;
     }

@@ -48,7 +48,7 @@ try {
         $runAction = false;
     }
 
-    $app = new \Keboola\MysqlExtractor\MySqlExtractor($logger);
+    $app = new \Keboola\MysqlExtractor\MysqlExtractor($logger);
     $app->run();
 
     $logger->log('info', "Extractor finished successfully.");
