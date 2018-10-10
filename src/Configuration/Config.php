@@ -18,7 +18,7 @@ class Config extends BaseExtractorConfig
         $dbParameters = $this->getValue(['parameters', 'db']);
 
         if (isset($dbParameters['ssl'])) {
-            return SslParameters::fromRaw($dbParameters['ssl']);
+            return SslParameters::fromArray($dbParameters['ssl']);
         }
         return null;
     }
