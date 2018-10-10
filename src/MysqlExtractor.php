@@ -21,8 +21,8 @@ use Keboola\Temp\Temp;
 
 class MysqlExtractor extends BaseExtractor
 {
-    public const TYPE_AUTO_INCREMENT = 'autoIncrement';
-    public const TYPE_TIMESTAMP = 'timestamp';
+    public const COLUMN_TYPE_AUTO_INCREMENT = 'autoIncrement';
+    public const COLUMN_TYPE_TIMESTAMP = 'timestamp';
 
     /**
      * @var \PDO|null
@@ -469,10 +469,10 @@ class MysqlExtractor extends BaseExtractor
         }
         if ($columns[0]['EXTRA'] === 'auto_increment') {
             $this->incrementalFetching['column'] = $columnName;
-            $this->incrementalFetching['type'] = self::TYPE_AUTO_INCREMENT;
+            $this->incrementalFetching['type'] = self::COLUMN_TYPE_AUTO_INCREMENT;
         } else if ($columns[0]['DATA_TYPE'] === 'timestamp') {
             $this->incrementalFetching['column'] = $columnName;
-            $this->incrementalFetching['type'] = self::TYPE_TIMESTAMP;
+            $this->incrementalFetching['type'] = self::COLUMN_TYPE_TIMESTAMP;
         } else {
             throw new UserException(
                 sprintf(
@@ -558,13 +558,13 @@ class MysqlExtractor extends BaseExtractor
 
         $incrementalAddon = null;
         if ($this->incrementalFetching && isset($this->state['lastFetchedRow'])) {
-            if ($this->incrementalFetching['type'] === self::TYPE_AUTO_INCREMENT) {
+            if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_AUTO_INCREMENT) {
                 $incrementalAddon = sprintf(
                     ' %s > %d',
                     $this->quote($this->incrementalFetching['column']),
                     (int) $this->state['lastFetchedRow']
                 );
-            } else if ($this->incrementalFetching['type'] === self::TYPE_TIMESTAMP) {
+            } else if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_TIMESTAMP) {
                 $incrementalAddon = sprintf(
                     " %s > '%s'",
                     $this->quote($this->incrementalFetching['column']),
