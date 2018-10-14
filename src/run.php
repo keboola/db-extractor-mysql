@@ -6,13 +6,10 @@ use Keboola\Component\UserException;
 use Keboola\Component\Logger;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Monolog\Handler\NullHandler;
 
 require_once(dirname(__FILE__) . "/../vendor/autoload.php");
 
 $logger = new Logger();
-
-$runAction = true;
 
 try {
     $dataDir = getenv('KBC_DATADIR') ?? '/data';
@@ -37,11 +34,6 @@ try {
         );
     }
 
-    if ($config['action'] !== 'run') {
-        $logger->setHandlers(array(new NullHandler(Logger::INFO)));
-        $runAction = false;
-    }
-
     $app = new \Keboola\MysqlExtractor\MysqlExtractor($logger);
     $app->run();
 
@@ -49,9 +41,6 @@ try {
     exit(0);
 } catch (UserException $e) {
     $logger->log('error', $e->getMessage());
-    if (!$runAction) {
-        echo $e->getMessage();
-    }
     exit(1);
 } catch (\Throwable $e) {
     $logger->critical(
