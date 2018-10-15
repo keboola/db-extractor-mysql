@@ -112,7 +112,6 @@ class MysqlExtractor extends BaseExtractor
         );
         try {
             $result = $proxy->call(function () use ($query, $outputTable, $isAdvancedQuery) {
-                /** @var \PDOStatement $stmt */
                 $stmt = $this->executeQuery($query);
                 $csvWriter = $this->createOutputCsv($outputTable);
                 $result = $this->writeToCsv($stmt, $csvWriter, $isAdvancedQuery);
