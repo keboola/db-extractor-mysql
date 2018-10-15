@@ -135,19 +135,19 @@ class MysqlExtractor extends BaseExtractor
             unlink($this->getOutputFilename($outputTable));
             $this->getLogger()->warning(
                 sprintf(
-                    "Query returned empty result. Nothing was imported to [%s]",
+                    'Query returned empty result. Nothing was imported to "%s"',
                     $table->getOutputTable()
                 )
             );
         }
 
         $output = [
-            "outputTable"=> $outputTable,
-            "rows" => $result['rows'],
+            'outputTable' => $outputTable,
+            'rows' => $result['rows'],
         ];
         // output state
         if (!empty($result['lastFetchedRow'])) {
-            $output["state"]['lastFetchedRow'] = $result['lastFetchedRow'];
+            $output['state']['lastFetchedRow'] = $result['lastFetchedRow'];
         }
         return $output;
     }
@@ -301,7 +301,7 @@ class MysqlExtractor extends BaseExtractor
                     if (count($filteredColumns) === 0) {
                         throw new ApplicationException(
                             sprintf(
-                                "This should never happen: Could not find reference column [%s] in table definition",
+                                'This should never happen: Could not find reference column "%s" in table definition',
                                 $column['COLUMN_NAME']
                             )
                         );
@@ -462,7 +462,7 @@ class MysqlExtractor extends BaseExtractor
         if (count($columns) === 0) {
             throw new UserException(
                 sprintf(
-                    'Column [%s] specified for incremental fetching was not found in the table',
+                    'Column "%s" specified for incremental fetching was not found in the table',
                     $columnName
                 )
             );
@@ -476,7 +476,7 @@ class MysqlExtractor extends BaseExtractor
         } else {
             throw new UserException(
                 sprintf(
-                    'Column [%s] specified for incremental fetching is not'
+                    'Column "%s" specified for incremental fetching is not'
                     . ' an auto increment column or an auto update timestamp',
                     $columnName
                 )
@@ -515,7 +515,7 @@ class MysqlExtractor extends BaseExtractor
                 if (!array_key_exists($this->incrementalFetching['column'], $lastRow)) {
                     throw new UserException(
                         sprintf(
-                            "The specified incremental fetching column %s not found in the table",
+                            'The specified incremental fetching column "%s" not found in the table',
                             $this->incrementalFetching['column']
                         )
                     );
@@ -572,7 +572,7 @@ class MysqlExtractor extends BaseExtractor
                 );
             } else {
                 throw new ApplicationException(
-                    sprintf('Unknown incremental fetching column type %s', $this->incrementalFetching['type'])
+                    sprintf('Unknown incremental fetching column type "%s"', $this->incrementalFetching['type'])
                 );
             }
         }
