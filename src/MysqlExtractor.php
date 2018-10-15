@@ -514,7 +514,8 @@ class MysqlExtractor extends BaseExtractor
                 if (!array_key_exists($this->incrementalFetching['column'], $lastRow)) {
                     throw new UserException(
                         sprintf(
-                            'The specified incremental fetching column "%s" not found in the table. Available columns "%s".',
+                            'The specified incremental fetching column "%s" not found in the table.'
+                            . ' Available columns "%s".',
                             $this->incrementalFetching['column'],
                             implode(', ', array_keys($resultRow))
                         )
