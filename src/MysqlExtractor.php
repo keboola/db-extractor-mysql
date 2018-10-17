@@ -37,8 +37,12 @@ class MysqlExtractor extends BaseExtractor
         return Config::class;
     }
 
-    protected function getConfigDefinition(string $action, bool $isConfigRow): string
+    protected function getConfigDefinitionClass(): string
     {
+        $configRaw = $this->getRawConfig();
+        $action = $configRaw['action'];
+        $isConfigRow = !isset($configRaw['parameters']['tables']);
+
         if ($action !== 'run') {
             return MySQLConfigActionDefinition::class;
         } elseif ($isConfigRow) {
