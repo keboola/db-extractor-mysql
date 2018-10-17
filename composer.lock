@@ -152,12 +152,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "3d8c08cb6123cb6a31935847eedb1bb1eef95ab2"
+                "reference": "923e4fb62e2b74d6e23c65d473bc8adb3d37b033"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/3d8c08cb6123cb6a31935847eedb1bb1eef95ab2",
-                "reference": "3d8c08cb6123cb6a31935847eedb1bb1eef95ab2",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/923e4fb62e2b74d6e23c65d473bc8adb3d37b033",
+                "reference": "923e4fb62e2b74d6e23c65d473bc8adb3d37b033",
                 "shasum": ""
             },
             "require": {
@@ -200,20 +200,20 @@
                 }
             ],
             "description": "Common library from Keboola Database Extractors",
-            "time": "2018-10-14T12:46:36+00:00"
+            "time": "2018-10-16T11:34:54+00:00"
         },
         {
             "name": "keboola/php-component",
-            "version": "4.3.0",
+            "version": "4.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-component.git",
-                "reference": "ccf0a216c0184d27b4f1db4d7d8042177ef6842a"
+                "reference": "5c7c604d1a0a6c79495e90b85531fa50373d08d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-component/zipball/ccf0a216c0184d27b4f1db4d7d8042177ef6842a",
-                "reference": "ccf0a216c0184d27b4f1db4d7d8042177ef6842a",
+                "url": "https://api.github.com/repos/keboola/php-component/zipball/5c7c604d1a0a6c79495e90b85531fa50373d08d4",
+                "reference": "5c7c604d1a0a6c79495e90b85531fa50373d08d4",
                 "shasum": ""
             },
             "require": {
@@ -254,7 +254,7 @@
                 "docker",
                 "keboola"
             ],
-            "time": "2018-10-02T15:21:16+00:00"
+            "time": "2018-10-17T17:43:42+00:00"
         },
         {
             "name": "keboola/php-datatypes",
@@ -972,16 +972,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "6.0.8",
+            "version": "6.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "848f78b3309780fef7ec8c4666b7ab4e6b09b22f"
+                "reference": "0685fb6a43aed1b2e09804d1aaf17144c82861f8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/848f78b3309780fef7ec8c4666b7ab4e6b09b22f",
-                "reference": "848f78b3309780fef7ec8c4666b7ab4e6b09b22f",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/0685fb6a43aed1b2e09804d1aaf17144c82861f8",
+                "reference": "0685fb6a43aed1b2e09804d1aaf17144c82861f8",
                 "shasum": ""
             },
             "require": {
@@ -1005,7 +1005,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "6.0-dev"
+                    "dev-master": "6.1-dev"
                 }
             },
             "autoload": {
@@ -1031,7 +1031,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-10-04T03:41:23+00:00"
+            "time": "2018-10-16T05:37:37+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
