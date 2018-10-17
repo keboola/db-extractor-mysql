@@ -624,7 +624,7 @@ class MySQLTest extends AbstractMySQLTest
             $app->run();
             $this->fail('table schema and database mismatch');
         } catch (UserException $e) {
-            $this->assertStringStartsWith("Invalid Configuration", $e->getMessage());
+            $this->assertStringStartsWith('Invalid Configuration', $e->getMessage());
         }
     }
 
@@ -871,7 +871,7 @@ class MySQLTest extends AbstractMySQLTest
             $app->run();
             $this->fail('specified autoIncrement column does not exist, should fail.');
         } catch (UserException $e) {
-            $this->assertStringStartsWith("Column \"fakeCol\"", $e->getMessage());
+            $this->assertStringStartsWith('Column "fakeCol"', $e->getMessage());
         }
 
         // column exists but is not auto-increment nor updating timestamp so should fail
@@ -881,7 +881,7 @@ class MySQLTest extends AbstractMySQLTest
             $app->run();
             $this->fail('specified column is not auto increment nor timestamp, should fail.');
         } catch (UserException $e) {
-            $this->assertStringStartsWith("Column \"weird-Name\" specified for incremental fetching", $e->getMessage());
+            $this->assertStringStartsWith('Column "weird-Name" specified for incremental fetching', $e->getMessage());
         }
     }
 
