@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
+use Keboola\Component\JsonHelper;
 use Keboola\Csv\CsvReader;
 use Keboola\Component\UserException;
 use Nette\Utils;
@@ -20,7 +21,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -35,7 +36,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -49,7 +50,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -70,7 +71,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv';
 
@@ -104,7 +105,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -132,7 +133,7 @@ class MySQLTest extends AbstractMySQLTest
         $app = $this->createApplication($config);
 
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -162,7 +163,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $sanitizedTable = Utils\Strings::webalize($result['imported'][0]['outputTable'], '._');
         $outputCsvFile = $this->dataDir . '/out/tables/' . $sanitizedTable . '.csv';
@@ -214,7 +215,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
@@ -273,7 +274,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertGreaterThanOrEqual(4, count($result['tables']));
 
@@ -344,15 +345,12 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $importedTable = ($isConfigRow) ? $result['imported']['outputTable'] : $result['imported'][0]['outputTable'];
 
         $sanitizedTable = Utils\Strings::webalize($importedTable, '._');
-        $outputManifest = json_decode(
-            (string) file_get_contents($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest'),
-            true
-        );
+        $outputManifest = JsonHelper::readFile($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest');
 
         $this->assertArrayHasKey('destination', $outputManifest);
         $this->assertArrayHasKey('incremental', $outputManifest);
@@ -643,7 +641,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         echo "\nThere are " . count($result['tables']) . " tables\n";
     }
@@ -655,7 +653,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -666,7 +664,7 @@ class MySQLTest extends AbstractMySQLTest
             $result['imported']
         );
         $outputManifestFile = $this->dataDir . '/out/tables/' . $result['imported']['outputTable'] . '.csv.manifest';
-        $manifest = json_decode(file_get_contents($outputManifestFile), true);
+        $manifest = JsonHelper::readFile($outputManifestFile);
         $expectedColumns = ['weird_I_d', 'weird_Name', 'timestamp', 'datetime', 'intColumn', 'decimalColumn'];
         $this->assertEquals($expectedColumns, $manifest['columns']);
         $this->assertEquals(['weird_I_d'], $manifest['primary_key']);
@@ -680,7 +678,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -700,7 +698,7 @@ class MySQLTest extends AbstractMySQLTest
         // the next fetch should be empty
         $app = $this->createApplication($config, $result['state']);
         $stdout = $this->runApplication($app);
-        $emptyResult = json_decode($stdout, true);
+        $emptyResult = JsonHelper::decode($stdout);
 
         $this->assertEquals(0, $emptyResult['imported']['rows']);
 
@@ -710,7 +708,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config, $result['state']);
         $stdout = $this->runApplication($app);
-        $newResult = json_decode($stdout, true);
+        $newResult = JsonHelper::decode($stdout);
 
         //check that output state contains expected information
         $this->assertArrayHasKey('state', $newResult);
@@ -776,7 +774,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -796,7 +794,7 @@ class MySQLTest extends AbstractMySQLTest
         // the next fetch should be empty
         $app = $this->createApplication($config, $result['state']);
         $stdout = $this->runApplication($app);
-        $emptyResult = json_decode($stdout, true);
+        $emptyResult = JsonHelper::decode($stdout);
 
         $this->assertEquals(0, $emptyResult['imported']['rows']);
 
@@ -806,7 +804,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config, $result['state']);
         $stdout = $this->runApplication($app);
-        $newResult = json_decode($stdout, true);
+        $newResult = JsonHelper::decode($stdout);
 
         //check that output state contains expected information
         $this->assertArrayHasKey('state', $newResult);
@@ -823,7 +821,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -843,7 +841,7 @@ class MySQLTest extends AbstractMySQLTest
         // the next fetch should contain the second row
         $app = $this->createApplication($config, $result['state']);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals(
             [
@@ -907,7 +905,7 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
 
         $this->assertEquals(

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
+use Keboola\Component\JsonHelper;
 use Keboola\Csv\CsvReader;
 use Symfony\Component\Filesystem;
 use Symfony\Component\Process\Process;
@@ -24,7 +25,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         @unlink($this->dataDir . '/config.json');
 
         $config = $this->getConfig(self::DRIVER);
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
         $csv1 = new CsvReader($csv1FilePath);
@@ -56,7 +57,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config = $this->getConfig();
         @unlink($this->dataDir . '/config.json');
         $config['action'] = 'testConnection';
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $process = new Process('php ' . $this->rootPath . '/src/run.php');
         $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
@@ -84,7 +85,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
             'remotePort' => $this->getEnv('mysql', 'DB_PORT'),
             'localPort' => '15211',
         ];
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $process = new Process('php ' . $this->rootPath . '/src/run.php');
         $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
@@ -100,7 +101,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config = $this->getConfig();
         $config['action'] = "getTables";
         @unlink($this->dataDir . '/config.json');
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $process = new Process('php ' . $this->rootPath . '/src/run.php');
         $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
@@ -122,7 +123,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
         @unlink($this->dataDir . '/config.json');
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
         $csv1 = new CsvReader($csv1FilePath);
@@ -152,7 +153,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         unset($config['parameters']['tables'][1]);
 
         @unlink($this->dataDir . '/config.json');
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         // try exporting before the table exists
 
@@ -197,8 +198,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config = $this->getConfigRow(self::DRIVER);
 
         @unlink($this->dataDir . '/config.json');
-
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $process = new Process('php ' . $this->rootPath . '/src/run.php');
         $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
@@ -244,7 +244,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config['parameters']['primaryKey'] = ['_weird-I-d'];
         $config['parameters']['incrementalFetchingColumn'] = '_weird-I-d';
 
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
         $process = new Process('php ' . $this->rootPath . '/src/run.php');
         $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
@@ -257,7 +257,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $this->assertFileExists($outputStateFile);
         $this->assertEquals(
             ['lastFetchedRow' => '2'],
-            json_decode((string) file_get_contents($outputStateFile), true)
+            JsonHelper::readFile($outputStateFile)
         );
 
         // add a couple rows
@@ -278,7 +278,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $this->assertEquals(0, $process->getExitCode());
         $this->assertEquals(
             ['lastFetchedRow' => '4'],
-            json_decode((string) file_get_contents($outputStateFile), true)
+            JsonHelper::readFile($outputStateFile)
         );
     }
 }

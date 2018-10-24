@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
+use Keboola\Component\JsonHelper;
 use Keboola\Csv\CsvReader;
 
 class MySQLSSLTest extends AbstractMySQLTest
@@ -34,7 +35,7 @@ class MySQLSSLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -61,7 +62,7 @@ class MySQLSSLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
         $stdout = $this->runApplication($app);
-        $result = json_decode($stdout, true);
+        $result = JsonHelper::decode($stdout);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv';
 
