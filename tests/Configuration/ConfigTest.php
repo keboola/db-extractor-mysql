@@ -19,7 +19,7 @@ class ConfigTest extends TestCase
             new MySQLConfigActionDefinition()
         );
 
-        $this->assertTrue($config->isNetworkCompression());
+        $this->assertTrue($config->isNetworkCompressionEnabled());
     }
 
     public function testGetSslParametersSuccessfully(): void

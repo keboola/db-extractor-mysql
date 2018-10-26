@@ -8,7 +8,7 @@ use Keboola\DbExtractorCommon\Configuration\BaseExtractorConfig;
 
 class Config extends BaseExtractorConfig
 {
-    public function isNetworkCompression(): bool
+    public function isNetworkCompressionEnabled(): bool
     {
         return $this->getValue(['parameters', 'db', 'networkCompression']);
     }

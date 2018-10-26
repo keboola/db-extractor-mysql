@@ -322,7 +322,7 @@ class MysqlExtractor extends BaseExtractor
 
         $options = [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, // convert errors to PDOExceptions
-            \PDO::MYSQL_ATTR_COMPRESS => $config->isNetworkCompression(), // network compression
+            \PDO::MYSQL_ATTR_COMPRESS => $config->isNetworkCompressionEnabled(), // network compression
         ];
 
         // ssl encryption
@@ -399,7 +399,7 @@ class MysqlExtractor extends BaseExtractor
             }
         }
 
-        if ($config->isNetworkCompression()) {
+        if ($config->isNetworkCompressionEnabled()) {
             /** @var \PDOStatement $stmt */
             $stmt = $pdo->query("SHOW SESSION STATUS LIKE 'Compression';");
             $status = $stmt->fetch(\PDO::FETCH_ASSOC);
