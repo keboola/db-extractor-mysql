@@ -727,7 +727,9 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTable();
         $this->createAutoIncrementAndTimestampTableWithFK();
 
-        $result = ($this->createApplication($config))->run();
+        $app =  $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -745,14 +747,20 @@ class MySQLTest extends AbstractMySQLTest
 
         sleep(2);
         // the next fetch should be empty
-        $emptyResult = ($this->createApplication($config, $result['state']))->run();
+        $app =  $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $emptyResult = JsonHelper::decode($stdout);
         $this->assertEquals(0, $emptyResult['imported']['rows']);
 
         sleep(2);
         //now add a couple rows and run it again.
-        $this->pdo->exec('INSERT INTO auto_increment_timestamp_withFK (`random_name`) VALUES (\'charles\'), (\'william\')');
+        $this->pdo->exec(
+            'INSERT INTO auto_increment_timestamp_withFK (`random_name`) VALUES (\'charles\'), (\'william\')'
+        );
 
-        $newResult = ($this->createApplication($config, $result['state']))->run();
+        $app =  $this->createApplication($config, $result['state']);
+        $stdout = $this->runApplication($app);
+        $newResult = JsonHelper::decode($stdout);
 
         //check that output state contains expected information
         $this->assertArrayHasKey('state', $newResult);

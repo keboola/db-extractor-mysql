@@ -42,7 +42,6 @@ class MySQLConfigRowDefinition extends BaseConfigDefinition
                 ->end()
                 ->integerNode('retries')
                     ->min(0)
-                    ->defaultValue(BaseExtractor::DEFAULT_MAX_TRIES)
                 ->end()
                 ->booleanNode('advancedMode')->end()
             ->end();

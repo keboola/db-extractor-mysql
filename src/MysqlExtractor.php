@@ -85,15 +85,13 @@ class MysqlExtractor extends BaseExtractor
 
         $this->getLogger()->info("Exporting to " . $outputTable);
 
-        $isAdvancedQuery = true;
-        if ($table->getTableDetail() && !$table->getQuery()) {
-            $isAdvancedQuery = false;
+        if (!$table->isAdvancedQuery()) {
             $query = $this->simpleQuery($table->getTableDetail(), $table->getColumns());
         } else {
             $query = $table->getQuery();
         }
 
-        $maxTries = $table->getRetries() > 1 ? $table->getRetries() : self::DEFAULT_MAX_TRIES;
+        $maxTries = $table->getRetries();
 
         // this will retry on CsvException
         $proxy = new RetryProxy(
@@ -103,10 +101,10 @@ class MysqlExtractor extends BaseExtractor
             [\PDOException::class, DeadConnectionException::class, \ErrorException::class]
         );
         try {
-            $result = $proxy->call(function () use ($query, $outputTable, $isAdvancedQuery) {
+            $result = $proxy->call(function () use ($query, $outputTable, $table) {
                 $stmt = $this->executeQuery($query);
                 $csvWriter = $this->createOutputCsv($outputTable);
-                $result = $this->writeToCsv($stmt, $csvWriter, $isAdvancedQuery);
+                $result = $this->writeToCsv($stmt, $csvWriter, $table->isAdvancedQuery());
                 $this->checkConnectionIsAlive();
                 return $result;
             });
