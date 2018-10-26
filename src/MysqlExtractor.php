@@ -342,7 +342,7 @@ class MysqlExtractor extends BaseExtractor
                 $options[\PDO::MYSQL_ATTR_SSL_CA] = $this->createSSLFile($sslParameters->getCa(), $temp);
                 $isSsl = true;
             }
-            if ($sslParameters->getCipher()) {
+            if ($sslParameters->getCipher() !== '') {
                 $options[\PDO::MYSQL_ATTR_SSL_CIPHER] = $sslParameters->getCipher();
             }
             if ($sslParameters->getVerifyServerCert() === false) {

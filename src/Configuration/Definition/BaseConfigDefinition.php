@@ -53,7 +53,7 @@ class BaseConfigDefinition extends BaseExtractorConfigDefinition
             ->scalarNode('ca')->end()
             ->scalarNode('cert')->end()
             ->scalarNode('key')->end()
-            ->scalarNode('cipher')->end()
+            ->scalarNode('cipher')->defaultValue('')->end()
             ->booleanNode('verifyServerCert')->defaultTrue()->end()
             ->end();
         // @formatter:on

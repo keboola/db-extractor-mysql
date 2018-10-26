@@ -18,20 +18,20 @@ class SslParameters
     /** @var string */
     private $key;
 
-    /** @var bool */
-    private $verifyServerCert;
-
     /** @var string|null */
     private $cipher;
 
-    public function __construct(bool $enabled, string $ca, string $cert, string $key, bool $verifyServerCert, ?string $cipher = null)
+    /** @var bool */
+    private $verifyServerCert;
+
+    public function __construct(bool $enabled, string $ca, string $cert, string $key, string $cipher, bool $verifyServerCert)
     {
         $this->enabled = $enabled;
         $this->ca = $ca;
         $this->cert = $cert;
         $this->key = $key;
-        $this->verifyServerCert = $verifyServerCert;
         $this->cipher = $cipher;
+        $this->verifyServerCert = $verifyServerCert;
     }
 
     public function isEnabled(): bool
@@ -71,8 +71,8 @@ class SslParameters
             $sslParameters['ca'],
             $sslParameters['cert'],
             $sslParameters['key'],
-            $sslParameters['verifyServerCert'],
-            $sslParameters['cipher'] ?? null
+            $sslParameters['cipher']
+            $sslParameters['verifyServerCert']
         );
     }
 }
