@@ -52,7 +52,7 @@ class ConfigParametersProvider
             'id' => 1,
             'name' => 'test',
             'table' => [
-                'schema' => 'test_db',
+                'schema' => 'database_name',
                 'tableName' => 'table_name',
             ],
             'columns' => ['a', 'b'],
@@ -130,14 +130,17 @@ class ConfigParametersProvider
             'port' => '10002',
             'user' => 'username',
             '#password' => 'pw',
-            'database' => 'schema',
+            'database' => 'database_name',
             'networkCompression' => true,
         ];
     }
 
     private static function getDbNodeMinimal(): array
     {
-        return ['user' => 'username'];
+        return [
+            'database' => 'database_name',
+            'user' => 'username',
+        ];
     }
 
     private static function getSslNodeBasic(): array

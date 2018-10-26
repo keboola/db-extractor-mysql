@@ -56,8 +56,9 @@ class MysqlExtractor extends BaseExtractor
     {
         $imported = [];
         $outputState = [];
-        if ($config->isConfigRow()) {
-            $tableParameters = TableParameters::fromRaw($config->getParameters());
+
+        $tableParameters = $config->getConfigRowTableParameters();
+        if ($tableParameters) {
             $exportResults = $this->extractTable($tableParameters);
             if (isset($exportResults['state'])) {
                 $outputState = $exportResults['state'];
@@ -80,19 +81,6 @@ class MysqlExtractor extends BaseExtractor
 
     private function extractTable(TableParameters $table): array
     {
-        /** @var Config $config */
-        $config = $this->getConfig();
-        if ($table->getTableDetail()
-            && $config->getDbParameters()->getDatabase() !== $table->getTableDetail()->getSchema()
-        ) {
-            throw new UserException(sprintf(
-                'Invalid Configuration in "%s".  The table schema "%s" is different from the connection database "%s"',
-                $table->getOutputTable(),
-                $table->getTableDetail()->getSchema(),
-                $config->getDbParameters()->getDatabase()
-            ));
-        }
-
         $outputTable = $table->getOutputTable();
 
         $this->getLogger()->info("Exporting to " . $outputTable);
@@ -119,7 +107,7 @@ class MysqlExtractor extends BaseExtractor
                 $stmt = $this->executeQuery($query);
                 $csvWriter = $this->createOutputCsv($outputTable);
                 $result = $this->writeToCsv($stmt, $csvWriter, $isAdvancedQuery);
-                $this->isAlive();
+                $this->checkConnectionIsAlive();
                 return $result;
             });
         } catch (\Keboola\Csv\Exception $e) {
@@ -135,7 +123,7 @@ class MysqlExtractor extends BaseExtractor
         if ($result['rows'] > 0) {
             $this->createManifest($table);
         } else {
-            unlink($this->getOutputFilename($outputTable));
+            unlink($this->getOutputFilePath($outputTable));
             $this->getLogger()->warning(
                 sprintf(
                     'Query returned empty result. Nothing was imported to "%s"',
@@ -536,8 +524,8 @@ class MysqlExtractor extends BaseExtractor
             return $output;
         }
         // no rows found.  If incremental fetching is turned on, we need to preserve the last state
-        if ($this->incrementalFetching['column'] && isset($this->state['lastFetchedRow'])) {
-            $output = $this->state;
+        if ($this->incrementalFetching['column'] && isset($this->getInputState()['lastFetchedRow'])) {
+            $output = $this->getInputState();
         }
         $output['rows'] = 0;
         return $output;
@@ -567,18 +555,18 @@ class MysqlExtractor extends BaseExtractor
         );
 
         $incrementalAddon = null;
-        if ($this->incrementalFetching && isset($this->state['lastFetchedRow'])) {
+        if ($this->incrementalFetching && isset($this->getInputState()['lastFetchedRow'])) {
             if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_AUTO_INCREMENT) {
                 $incrementalAddon = sprintf(
                     ' %s > %d',
                     $this->quote($this->incrementalFetching['column']),
-                    (int) $this->state['lastFetchedRow']
+                    (int) $this->getInputState()['lastFetchedRow']
                 );
             } else if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_TIMESTAMP) {
                 $incrementalAddon = sprintf(
                     " %s > '%s'",
                     $this->quote($this->incrementalFetching['column']),
-                    $this->state['lastFetchedRow']
+                    $this->getInputState()['lastFetchedRow']
                 );
             } else {
                 throw new ApplicationException(

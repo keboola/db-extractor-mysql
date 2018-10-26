@@ -180,8 +180,8 @@ abstract class AbstractMySQLTest extends ExtractorTest
     {
         putenv(sprintf('KBC_DATADIR=%s', $this->dataDir));
         $this->prepareConfigInDataDir($config);
+        $this->prepareInputStateInDataDir($state);
         $app = new MysqlExtractor(new Logger());
-        $app->setState($state);
         return $app;
     }
 

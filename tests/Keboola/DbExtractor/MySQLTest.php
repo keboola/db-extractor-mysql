@@ -617,13 +617,11 @@ class MySQLTest extends AbstractMySQLTest
         unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
 
-        try {
-            $app = $this->createApplication($config);
-            $app->run();
-            $this->fail('table schema and database mismatch');
-        } catch (UserException $e) {
-            $this->assertStringStartsWith('Invalid Configuration', $e->getMessage());
-        }
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            'Invalid configuration for path "root.parameters": Table schema and database mismatch.'
+        );
+        $this->createApplication($config);
     }
 
     public function testThousandsOfTables(): void
