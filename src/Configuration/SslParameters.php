@@ -54,7 +54,7 @@ class SslParameters
         return $this->key;
     }
 
-    public function getCipher(): ?string
+    public function getCipher(): string
     {
         return $this->cipher;
     }
