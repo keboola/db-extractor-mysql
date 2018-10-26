@@ -12,6 +12,8 @@ $logger = new Logger();
 try {
     $app = new \Keboola\MysqlExtractor\MysqlExtractor($logger);
     $app->run();
+
+    $logger->log('info', "Extractor finished successfully.");
     exit(0);
 } catch (UserException $e) {
     $logger->log('error', $e->getMessage());
