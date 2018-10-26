@@ -342,7 +342,7 @@ class MysqlExtractor extends BaseExtractor
             }
         }
 
-        $port = $databaseParameters->getPort() ?? '3306';
+        $port = $databaseParameters->getPort(3306);
 
         if ($databaseParameters->getDatabase()) {
             $dsn = sprintf(
