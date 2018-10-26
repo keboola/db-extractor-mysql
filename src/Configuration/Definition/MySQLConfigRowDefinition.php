@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\MysqlExtractor\Configuration\Definition;
 
+use Keboola\DbExtractorCommon\BaseExtractor;
 use Keboola\DbExtractorCommon\Configuration\ConfigDefinitionValidationHelper;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
@@ -40,7 +41,8 @@ class MySQLConfigRowDefinition extends BaseConfigDefinition
                     ->prototype('scalar')->end()
                 ->end()
                 ->integerNode('retries')
-                    ->min(1)
+                    ->min(0)
+                    ->defaultValue(BaseExtractor::DEFAULT_MAX_TRIES)
                 ->end()
                 ->booleanNode('advancedMode')->end()
             ->end();
