@@ -12,24 +12,10 @@ class BaseConfigDefinition extends BaseExtractorConfigDefinition
 {
     protected function getDbNode(): ArrayNodeDefinition
     {
-        $builder = new TreeBuilder();
-
-        /** @var ArrayNodeDefinition $node */
-        $node = $builder->root('db');
-
         // @formatter:off
+        $node = parent::getDbNode();
         $node
-            ->ignoreExtraKeys(false)
             ->children()
-                ->scalarNode('driver')->end()
-                ->scalarNode('host')->end()
-                ->scalarNode('port')->end()
-                ->scalarNode('database')->end()
-                ->scalarNode('user')
-                    ->isRequired()
-                ->end()
-                ->scalarNode('#password')->end()
-                ->append($this->getSshNode())
                 ->append($this->getSslNode())
                 ->booleanNode('networkCompression')
                     ->defaultValue(false)
@@ -39,7 +25,6 @@ class BaseConfigDefinition extends BaseExtractorConfigDefinition
 
         return $node;
     }
-
     public function getSslNode(): ArrayNodeDefinition
     {
         $builder = new TreeBuilder();

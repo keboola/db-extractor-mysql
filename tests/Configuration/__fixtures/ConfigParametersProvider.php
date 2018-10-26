@@ -140,6 +140,7 @@ class ConfigParametersProvider
         return [
             'database' => 'database_name',
             'user' => 'username',
+            '#password' => 'pw',
         ];
     }
 
