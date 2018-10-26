@@ -41,7 +41,7 @@ class MySQLConfigRowDefinitionTest extends TestCase
             new MySQLConfigRowDefinition()
         );
         $this->assertInstanceOf(Config::class, $config);
-        $this->arrayHasKey('someExtraKey', $config->getParameters());
+        $this->assertArrayHasKey('someExtraKey', $config->getParameters());
     }
 
     public function testCreateConfigWithDefinedTableAndQueryThrowsException(): void
