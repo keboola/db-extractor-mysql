@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "keboola/db-extractor-common": "dev-david-adapter",
+        "keboola/db-extractor-common": "dev-david-v10",
         "keboola/php-temp": "^1.0",
         "keboola/php-utils": "^2.3.1",
         "symfony/serializer": "^4.1"

@@ -342,20 +342,18 @@ class MysqlExtractor extends BaseExtractor
             }
         }
 
-        $port = $databaseParameters->getPort(3306);
-
         if ($databaseParameters->getDatabase()) {
             $dsn = sprintf(
                 "mysql:host=%s;port=%s;dbname=%s;charset=utf8",
                 $databaseParameters->getHost(),
-                $port,
+                $databaseParameters->getPort(),
                 $databaseParameters->getDatabase()
             );
         } else {
             $dsn = sprintf(
                 "mysql:host=%s;port=%s;charset=utf8",
                 $databaseParameters->getHost(),
-                $port
+                $databaseParameters->getPort()
             );
         }
 
@@ -470,7 +468,7 @@ class MysqlExtractor extends BaseExtractor
         }
     }
 
-    protected function quote(string $obj): string
+    protected function quoteIdentifier(string $obj): string
     {
         return "`{$obj}`";
     }
@@ -526,15 +524,7 @@ class MysqlExtractor extends BaseExtractor
     private function simpleQuery(TableDetailParameters $table, ?array $columns = array()): string
     {
         if (count($columns) > 0) {
-            $columnQuery = implode(
-                ', ',
-                array_map(
-                    function ($column) {
-                        return $this->quote($column);
-                    },
-                    $columns
-                )
-            );
+            $columnQuery = implode(', ', $this->quoteIdentifiers($columns));
         } else {
             $columnQuery = '*';
         }
@@ -542,8 +532,8 @@ class MysqlExtractor extends BaseExtractor
         $query = sprintf(
             "SELECT %s FROM %s.%s",
             $columnQuery,
-            $this->quote($table->getSchema()),
-            $this->quote($table->getTableName())
+            $this->quoteIdentifier($table->getSchema()),
+            $this->quoteIdentifier($table->getTableName())
         );
 
         $incrementalAddon = null;
@@ -551,13 +541,13 @@ class MysqlExtractor extends BaseExtractor
             if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_AUTO_INCREMENT) {
                 $incrementalAddon = sprintf(
                     ' %s > %d',
-                    $this->quote($this->incrementalFetching['column']),
+                    $this->quoteIdentifier($this->incrementalFetching['column']),
                     (int) $this->getInputState()['lastFetchedRow']
                 );
             } else if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_TIMESTAMP) {
                 $incrementalAddon = sprintf(
                     " %s > '%s'",
-                    $this->quote($this->incrementalFetching['column']),
+                    $this->quoteIdentifier($this->incrementalFetching['column']),
                     $this->getInputState()['lastFetchedRow']
                 );
             } else {
@@ -571,7 +561,7 @@ class MysqlExtractor extends BaseExtractor
             $query .= sprintf(
                 " WHERE %s ORDER BY %s",
                 $incrementalAddon,
-                $this->quote($this->incrementalFetching['column'])
+                $this->quoteIdentifier($this->incrementalFetching['column'])
             );
         }
         if (isset($this->incrementalFetching['limit'])) {
