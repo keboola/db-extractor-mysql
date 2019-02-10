@@ -6,6 +6,7 @@ namespace Keboola\MysqlExtractor;
 
 use Keboola\Component\UserException;
 use Keboola\Csv\CsvWriter;
+use Keboola\Datatype\Definition\MySQL as MysqlDatatype;
 use Keboola\DbExtractorCommon\BaseExtractor;
 use Keboola\DbExtractorCommon\Configuration\BaseExtractorConfig;
 use Keboola\DbExtractorCommon\Configuration\TableDetailParameters;
@@ -21,8 +22,9 @@ use Keboola\Temp\Temp;
 
 class MysqlExtractor extends BaseExtractor
 {
-    public const COLUMN_TYPE_AUTO_INCREMENT = 'autoIncrement';
-    public const COLUMN_TYPE_TIMESTAMP = 'timestamp';
+    public const INCREMENT_TYPE_NUMERIC = 'numeric';
+    public const INCREMENT_TYPE_TIMESTAMP = 'timestamp';
+    public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
 
     /**
      * @var \PDO|null
@@ -448,21 +450,27 @@ class MysqlExtractor extends BaseExtractor
                 )
             );
         }
-        if ($columns[0]['EXTRA'] === 'auto_increment') {
-            $this->incrementalFetching['column'] = $columnName;
-            $this->incrementalFetching['type'] = self::COLUMN_TYPE_AUTO_INCREMENT;
-        } else if ($columns[0]['DATA_TYPE'] === 'timestamp'  || $columns[0]['DATA_TYPE'] === 'datetime') {
-            $this->incrementalFetching['column'] = $columnName;
-            $this->incrementalFetching['type'] = self::COLUMN_TYPE_TIMESTAMP;
-        } else {
+
+        try {
+            $datatype = new MysqlDatatype($columns[0]['DATA_TYPE']);
+            if (in_array($datatype->getBasetype(), self::NUMERIC_BASE_TYPES)) {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_NUMERIC;
+            } else if ($datatype->getBasetype() === 'TIMESTAMP') {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_TIMESTAMP;
+            } else {
+                throw new UserException('invalid incremental fetching column type');
+            }
+        } catch (\Keboola\Datatype\Definition\Exception\InvalidLengthException | UserException $exception) {
             throw new UserException(
                 sprintf(
-                    'Column "%s" specified for incremental fetching is not'
-                    . ' an auto increment column or an auto update timestamp',
+                    'Column "%s" specified for incremental fetching is not a numeric or timestamp type column',
                     $columnName
                 )
             );
         }
+
         if ($limit) {
             $this->incrementalFetching['limit'] = $limit;
         }
@@ -521,48 +529,37 @@ class MysqlExtractor extends BaseExtractor
         return $output;
     }
 
-    private function simpleQuery(TableDetailParameters $table, ?array $columns = array()): string
+    public function simpleQuery(TableDetailParameters $table, ?array $columns = array()): string
     {
-        if (count($columns) > 0) {
-            $columnQuery = implode(', ', $this->quoteIdentifiers($columns));
-        } else {
-            $columnQuery = '*';
-        }
-
-        $query = sprintf(
-            "SELECT %s FROM %s.%s",
-            $columnQuery,
-            $this->quoteIdentifier($table->getSchema()),
-            $this->quoteIdentifier($table->getTableName())
-        );
-
         $incrementalAddon = null;
-        if ($this->incrementalFetching && isset($this->getInputState()['lastFetchedRow'])) {
-            if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_AUTO_INCREMENT) {
+        if ($this->incrementalFetching && isset($this->incrementalFetching['column'])) {
+            if (isset($this->getInputState()['lastFetchedRow'])) {
                 $incrementalAddon = sprintf(
-                    ' %s > %d',
+                    " WHERE %s >= %s",
                     $this->quoteIdentifier($this->incrementalFetching['column']),
-                    (int) $this->getInputState()['lastFetchedRow']
-                );
-            } else if ($this->incrementalFetching['type'] === self::COLUMN_TYPE_TIMESTAMP) {
-                $incrementalAddon = sprintf(
-                    " %s > '%s'",
-                    $this->quoteIdentifier($this->incrementalFetching['column']),
-                    $this->getInputState()['lastFetchedRow']
-                );
-            } else {
-                throw new ApplicationException(
-                    sprintf('Unknown incremental fetching column type "%s"', $this->incrementalFetching['type'])
+                    $this->db->quote((string) $this->getInputState()['lastFetchedRow'])
                 );
             }
+            $incrementalAddon .= sprintf(" ORDER BY %s", $this->quoteIdentifier($this->incrementalFetching['column']));
         }
-
-        if ($incrementalAddon) {
-            $query .= sprintf(
-                " WHERE %s ORDER BY %s",
-                $incrementalAddon,
-                $this->quoteIdentifier($this->incrementalFetching['column'])
+        if (count($columns) > 0) {
+            $query = sprintf(
+                "SELECT %s FROM %s.%s",
+                implode(', ', array_map(function ($column): string {
+                    return $this->quoteIdentifier($column);
+                }, $columns)),
+                $this->quoteIdentifier($table->getSchema()),
+                $this->quoteIdentifier($table->getTableName())
             );
+        } else {
+            $query = sprintf(
+                "SELECT * FROM %s.%s",
+                $this->quoteIdentifier($table->getSchema()),
+                $this->quoteIdentifier($table->getTableName())
+            );
+        }
+        if ($incrementalAddon) {
+            $query .= $incrementalAddon;
         }
         if (isset($this->incrementalFetching['limit'])) {
             $query .= sprintf(

@@ -210,7 +210,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $this->assertFileNotExists($outputStateFile);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/in.c-main.escaping.csv.manifest');
-        $this->assertFileEquals( $this->dataDir . '/mysql/escaping.csv', $outputCsvFile);
+        $this->assertFileEquals($this->dataDir . '/mysql/escaping.csv', $outputCsvFile);
         $this->assertFileExists($outputCsvFile);
     }
 

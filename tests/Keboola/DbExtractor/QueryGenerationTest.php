@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
-use Keboola\DbExtractor\Extractor\MySQL;
-use Keboola\DbExtractor\Logger;
+use Keboola\Component\Logger;
+use Keboola\DbExtractorCommon\Configuration\TableDetailParameters;
+use Keboola\MysqlExtractor\MysqlExtractor;
 
 class QueryGenerationTest extends AbstractMySQLTest
 {
@@ -23,7 +24,9 @@ class QueryGenerationTest extends AbstractMySQLTest
      */
     public function testGetSimplifiedPdoQuery(array $params, array $state, string $expected): void
     {
-        $extractor = new MySQL($this->config['parameters'], $state, new Logger('mssql-extractor-test'));
+        $this->prepareConfigInDataDir($this->config);
+        $this->prepareInputStateInDataDir($state);
+        $extractor = new MysqlExtractor(new Logger());
 
         if (isset($params['incrementalFetchingColumn']) && $params['incrementalFetchingColumn'] !== "") {
             $extractor->validateIncrementalFetching(
@@ -42,10 +45,7 @@ class QueryGenerationTest extends AbstractMySQLTest
             // simple table select with all columns
             [
                 [
-                    'table' => [
-                        'tableName' => 'test',
-                        'schema' => 'testSchema',
-                    ],
+                    'table' => new TableDetailParameters('testSchema', 'test'),
                     'columns' => [],
                 ],
                 [],
@@ -54,10 +54,7 @@ class QueryGenerationTest extends AbstractMySQLTest
             // simple table select with all columns (columns as null)
             [
                 [
-                    'table' => [
-                        'tableName' => 'test',
-                        'schema' => 'testSchema',
-                    ],
+                    'table' => new TableDetailParameters('testSchema', 'test'),
                     'columns' => [],
                 ],
                 [],
@@ -66,10 +63,7 @@ class QueryGenerationTest extends AbstractMySQLTest
             // simple table with 2 columns selected
             [
                 [
-                    'table' => [
-                        'tableName' => 'test',
-                        'schema' => 'testSchema',
-                    ],
+                    'table' => new TableDetailParameters('testSchema', 'test'),
                     'columns' => ["col1", "col2"],
                 ],
                 [],
@@ -78,10 +72,7 @@ class QueryGenerationTest extends AbstractMySQLTest
             // test simplePDO query with limit and timestamp column but no state
             [
                 [
-                    'table' => [
-                        'tableName' => 'auto_increment_timestamp',
-                        'schema' => 'test',
-                    ],
+                    'table' => new TableDetailParameters('test', 'auto_increment_timestamp'),
                     'columns' => [],
                     'incrementalFetchingLimit' => 10,
                     'incrementalFetchingColumn' => 'timestamp',
@@ -92,10 +83,7 @@ class QueryGenerationTest extends AbstractMySQLTest
             // test simplePDO query with limit and idp column and previos state
             [
                 [
-                    'table' => [
-                        'tableName' => 'auto_increment_timestamp',
-                        'schema' => 'test',
-                    ],
+                    'table' => new TableDetailParameters('test', 'auto_increment_timestamp'),
                     'columns' => [],
                     'incrementalFetchingLimit' => 10,
                     'incrementalFetchingColumn' => '_weird-I-d',
@@ -103,15 +91,13 @@ class QueryGenerationTest extends AbstractMySQLTest
                 [
                     "lastFetchedRow" => 4,
                 ],
-                "SELECT * FROM `test`.`auto_increment_timestamp` WHERE `_weird-I-d` >= '4' ORDER BY `_weird-I-d` LIMIT 10",
+                "SELECT * FROM `test`.`auto_increment_timestamp` WHERE `_weird-I-d` >= '4'"
+                . " ORDER BY `_weird-I-d` LIMIT 10",
             ],
             // test simplePDO query timestamp column but no state and no limit
             [
                 [
-                    'table' => [
-                        'tableName' => 'auto_increment_timestamp',
-                        'schema' => 'test',
-                    ],
+                    'table' => new TableDetailParameters('test', 'auto_increment_timestamp'),
                     'columns' => [],
                     'incrementalFetchingLimit' => null,
                     'incrementalFetchingColumn' => 'timestamp',
@@ -122,10 +108,7 @@ class QueryGenerationTest extends AbstractMySQLTest
             // test simplePDO query id column and previos state and no limit
             [
                 [
-                    'table' => [
-                        'tableName' => 'auto_increment_timestamp',
-                        'schema' => 'test',
-                    ],
+                    'table' => new TableDetailParameters('test', 'auto_increment_timestamp'),
                     'columns' => [],
                     'incrementalFetchingLimit' => 0,
                     'incrementalFetchingColumn' => '_weird-I-d',
