@@ -152,12 +152,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "ce26cdb6b4f435ff97926093050356d46e0b6e3e"
+                "reference": "9f59487103e1ca9f8fb6f27265931fc8c1e35724"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/ce26cdb6b4f435ff97926093050356d46e0b6e3e",
-                "reference": "ce26cdb6b4f435ff97926093050356d46e0b6e3e",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/9f59487103e1ca9f8fb6f27265931fc8c1e35724",
+                "reference": "9f59487103e1ca9f8fb6f27265931fc8c1e35724",
                 "shasum": ""
             },
             "require": {
@@ -201,7 +201,7 @@
                 }
             ],
             "description": "Common library from Keboola Database Extractors",
-            "time": "2019-01-23T15:32:54+00:00"
+            "time": "2019-02-12T09:19:05+00:00"
         },
         {
             "name": "keboola/php-component",

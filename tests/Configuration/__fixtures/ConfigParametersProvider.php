@@ -160,7 +160,6 @@ class ConfigParametersProvider
         return [
             'enabled' => true,
             'keys' => [
-                'private' => 'private',
                 '#private' => 'private',
                 'public' => 'public',
             ],

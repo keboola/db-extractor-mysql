@@ -199,7 +199,6 @@ class MysqlExtractor extends BaseExtractor
             $curTable = $table['TABLE_SCHEMA'] . '.' . $table['TABLE_NAME'];
             $tableDefs[$curTable] = new Table(
                 $table['TABLE_NAME'],
-                \Keboola\Utils\sanitizeColumnName($table['TABLE_NAME']),
                 $table['TABLE_SCHEMA'] ?? '',
                 $table['TABLE_TYPE'] ?? '',
                 $table['TABLE_ROWS'] ? (int) $table['TABLE_ROWS'] : 0
@@ -232,7 +231,6 @@ class MysqlExtractor extends BaseExtractor
             }
             $curColumn = new Column(
                 $column['COLUMN_NAME'],
-                \Keboola\Utils\sanitizeColumnName($column['COLUMN_NAME']),
                 $column['DATA_TYPE'],
                 ($column['COLUMN_KEY'] === "PRI") ? true : false,
                 $length,

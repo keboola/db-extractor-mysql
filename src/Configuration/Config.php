@@ -10,7 +10,7 @@ class Config extends BaseExtractorConfig
 {
     public function isNetworkCompressionEnabled(): bool
     {
-        return $this->getValue(['parameters', 'db', 'networkCompression']);
+        return $this->getValue(['parameters', 'db', 'networkCompression'], false);
     }
 
     public function getSslParameters(): ?SslParameters

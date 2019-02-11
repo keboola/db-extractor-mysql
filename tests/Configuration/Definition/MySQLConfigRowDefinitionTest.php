@@ -32,16 +32,17 @@ class MySQLConfigRowDefinitionTest extends TestCase
         $this->assertInstanceOf(Config::class, $config);
     }
 
-    public function testCreateConfigWithExtraParametersSuccessfully(): void
+    public function testCreateConfigWithExtraParametersThrowsException(): void
     {
         $parameters = ConfigParametersProvider::getConfigRowParametersBasic();
         $parameters['someExtraKey'] = true;
-        $config = new Config(
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Unrecognized option "someExtraKey" under "root.parameters"');
+        new Config(
             ['parameters' => $parameters],
             new MySQLConfigRowDefinition()
         );
-        $this->assertInstanceOf(Config::class, $config);
-        $this->assertArrayHasKey('someExtraKey', $config->getParameters());
     }
 
     public function testCreateConfigWithDefinedTableAndQueryThrowsException(): void
