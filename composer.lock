@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "aadba68bc429871b43620cbc4d415c89",
+    "content-hash": "fa71e64791db76ea2aa887c6464c9ff1",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -148,29 +148,30 @@
         },
         {
             "name": "keboola/db-extractor-common",
-            "version": "dev-david-v10",
+            "version": "dev-david-value-objects",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-common.git",
-                "reference": "0aa3b1fe5e13f599c7a65a0aaa9d41cc6131ab91"
+                "reference": "ce26cdb6b4f435ff97926093050356d46e0b6e3e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/0aa3b1fe5e13f599c7a65a0aaa9d41cc6131ab91",
-                "reference": "0aa3b1fe5e13f599c7a65a0aaa9d41cc6131ab91",
+                "url": "https://api.github.com/repos/keboola/db-extractor-common/zipball/ce26cdb6b4f435ff97926093050356d46e0b6e3e",
+                "reference": "ce26cdb6b4f435ff97926093050356d46e0b6e3e",
                 "shasum": ""
             },
             "require": {
                 "keboola/csv": "^2.0",
                 "keboola/datadir-tests": "^2.1",
                 "keboola/php-component": "^5.0",
-                "keboola/php-datatypes": "^3.2",
+                "keboola/php-datatypes": "^4.0",
                 "keboola/php-utils": "^2.3",
                 "keboola/ssh-tunnel": "^2.0",
                 "monolog/monolog": "^1.23",
                 "nette/utils": "^2.5",
                 "php": ">=7.1",
                 "symfony/config": "^4.1",
+                "symfony/debug": "^4.1",
                 "symfony/process": "^4.1",
                 "symfony/serializer": "^4.1",
                 "vkartaviy/retry": "^0.2"
@@ -200,7 +201,7 @@
                 }
             ],
             "description": "Common library from Keboola Database Extractors",
-            "time": "2018-11-01T10:41:02+00:00"
+            "time": "2019-01-23T15:32:54+00:00"
         },
         {
             "name": "keboola/php-component",
@@ -259,16 +260,16 @@
         },
         {
             "name": "keboola/php-datatypes",
-            "version": "3.2.1",
+            "version": "4.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/php-datatypes.git",
-                "reference": "f16967a5da1b67e4a9fb38b07a1b0df3e588abb8"
+                "reference": "e286e8b46e18f8e0ba49c108899a5451ea23717e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/php-datatypes/zipball/f16967a5da1b67e4a9fb38b07a1b0df3e588abb8",
-                "reference": "f16967a5da1b67e4a9fb38b07a1b0df3e588abb8",
+                "url": "https://api.github.com/repos/keboola/php-datatypes/zipball/e286e8b46e18f8e0ba49c108899a5451ea23717e",
+                "reference": "e286e8b46e18f8e0ba49c108899a5451ea23717e",
                 "shasum": ""
             },
             "require-dev": {
@@ -290,7 +291,7 @@
                     "email": "ondrej.hlavacek@keboola.com"
                 }
             ],
-            "time": "2018-08-02T15:13:46+00:00"
+            "time": "2019-01-08T15:03:31+00:00"
         },
         {
             "name": "keboola/php-temp",
@@ -2028,6 +2029,62 @@
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
             "time": "2018-10-31T09:09:42+00:00"
+        },
+        {
+            "name": "symfony/debug",
+            "version": "v4.2.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/debug.git",
+                "reference": "cf9b2e33f757deb884ce474e06d2647c1c769b65"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/debug/zipball/cf9b2e33f757deb884ce474e06d2647c1c769b65",
+                "reference": "cf9b2e33f757deb884ce474e06d2647c1c769b65",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.3",
+                "psr/log": "~1.0"
+            },
+            "conflict": {
+                "symfony/http-kernel": "<3.4"
+            },
+            "require-dev": {
+                "symfony/http-kernel": "~3.4|~4.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "4.2-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Debug\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony Debug Component",
+            "homepage": "https://symfony.com",
+            "time": "2019-01-25T14:35:16+00:00"
         },
         {
             "name": "symfony/filesystem",

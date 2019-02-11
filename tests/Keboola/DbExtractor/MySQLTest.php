@@ -229,26 +229,29 @@ class MySQLTest extends AbstractMySQLTest
                     'name' => 'auto_increment_timestamp',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '2',
-                    'autoIncrement' => '3',
+                    'rowCount' => 2,
+                    'autoIncrement' => 3,
                     'columns' => $this->expectedTableColumns('test', 'auto_increment_timestamp'),
                     'description' => 'This is a table comment',
+                    'sanitizedName' => 'auto_increment_timestamp',
                 ),
             1 =>
                 array (
                     'name' => 'escaping',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '7',
+                    'rowCount' => 7,
                     'columns' => $this->expectedTableColumns('test', 'escaping'),
+                    'sanitizedName' => 'escaping',
                 ),
             2 =>
                 array (
                     'name' => 'sales',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '100',
+                    'rowCount' => 100,
                     'columns' => $this->expectedTableColumns('test', 'sales'),
+                    'sanitizedName' => 'sales',
                 ),
         );
         $this->assertEquals($expectedData, $result['tables']);
@@ -284,34 +287,38 @@ class MySQLTest extends AbstractMySQLTest
                     'name' => 'ext_sales',
                     'schema' => 'temp_schema',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '100',
+                    'rowCount' => 100,
                     'columns' => $this->expectedTableColumns('temp_schema', 'ext_sales'),
+                    'sanitizedName' => 'ext_sales',
                 ),
             1 =>
                 array (
                     'name' => 'auto_increment_timestamp',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '2',
-                    'autoIncrement' => '3',
+                    'rowCount' => 2,
+                    'autoIncrement' => 3,
                     'columns' => $this->expectedTableColumns('test', 'auto_increment_timestamp'),
                     'description' => 'This is a table comment',
+                    'sanitizedName' => 'auto_increment_timestamp',
                 ),
             2 =>
                 array (
                     'name' => 'escaping',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '7',
+                    'rowCount' => 7,
                     'columns' => $this->expectedTableColumns('test', 'escaping'),
+                    'sanitizedName' => 'escaping',
                 ),
             3 =>
                 array (
                     'name' => 'sales',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '100',
+                    'rowCount' => 100,
                     'columns' => $this->expectedTableColumns('test', 'sales'),
+                    'sanitizedName' => 'sales',
                 ),
         );
         $this->assertEquals($expectedTables, $result['tables']);
@@ -361,7 +368,8 @@ class MySQLTest extends AbstractMySQLTest
             'KBC.type' => 'BASE TABLE',
             'KBC.rowCount' => 1,
             'KBC.description' => 'This is a table comment',
-            'KBC.autoIncrement' => '2',
+            'KBC.autoIncrement' => 2,
+            'KBC.sanitizedName' => 'auto_increment_timestamp_withFK',
         ];
         $tableMetadata = [];
         foreach ($outputManifest['metadata'] as $i => $metadata) {
@@ -419,18 +427,18 @@ class MySQLTest extends AbstractMySQLTest
                         ),
                     8 =>
                         array (
-                            'key' => 'KBC.description',
-                            'value' => 'This is a weird ID',
+                            'key' => 'KBC.autoIncrement',
+                            'value' => 2,
                         ),
                     9 =>
                         array (
-                            'key' => 'KBC.autoIncrement',
-                            'value' => '2',
+                            'key' => 'KBC.constraintName',
+                            'value' => 'PRIMARY',
                         ),
                     10 =>
                         array (
-                            'key' => 'KBC.constraintName',
-                            'value' => 'PRIMARY',
+                            'key' => 'KBC.description',
+                            'value' => 'This is a weird ID',
                         ),
                 ),
             'random_name' =>
@@ -573,13 +581,13 @@ class MySQLTest extends AbstractMySQLTest
                         ),
                     8 =>
                         array (
-                            'key' => 'KBC.description',
-                            'value' => 'This is a foreign key',
+                            'key' => 'KBC.constraintName',
+                            'value' => 'auto_increment_timestamp_withFK_ibfk_1',
                         ),
                     9 =>
                         array (
-                            'key' => 'KBC.constraintName',
-                            'value' => 'auto_increment_timestamp_withFK_ibfk_1',
+                            'key' => 'KBC.description',
+                            'value' => 'This is a foreign key',
                         ),
                     10 =>
                         array (

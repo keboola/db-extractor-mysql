@@ -18,6 +18,8 @@ use Keboola\MysqlExtractor\Configuration\Config;
 use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigActionDefinition;
 use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigDefinition;
 use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigRowDefinition;
+use Keboola\MysqlExtractor\DatabaseMetadata\Column;
+use Keboola\MysqlExtractor\DatabaseMetadata\Table;
 use Keboola\Temp\Temp;
 
 class MysqlExtractor extends BaseExtractor
@@ -191,24 +193,24 @@ class MysqlExtractor extends BaseExtractor
             return [];
         }
 
+        /** @var Table[] $tableDefs */
         $tableDefs = [];
         foreach ($arr as $table) {
             $curTable = $table['TABLE_SCHEMA'] . '.' . $table['TABLE_NAME'];
-            $tableDefs[$curTable] = [
-                'name' => $table['TABLE_NAME'],
-                'schema' => (isset($table['TABLE_SCHEMA'])) ? $table['TABLE_SCHEMA'] : '',
-                'type' => (isset($table['TABLE_TYPE'])) ? $table['TABLE_TYPE'] : '',
-                'rowCount' => (isset($table['TABLE_ROWS'])) ? $table['TABLE_ROWS'] : '',
-            ];
+            $tableDefs[$curTable] = new Table(
+                $table['TABLE_NAME'],
+                \Keboola\Utils\sanitizeColumnName($table['TABLE_NAME']),
+                $table['TABLE_SCHEMA'] ?? '',
+                $table['TABLE_TYPE'] ?? '',
+                $table['TABLE_ROWS'] ? (int) $table['TABLE_ROWS'] : 0
+            );
             if ($table["TABLE_COMMENT"]) {
-                $tableDefs[$curTable]['description'] = $table['TABLE_COMMENT'];
+                $tableDefs[$curTable]->setDescription($table['TABLE_COMMENT']);
             }
             if ($table["AUTO_INCREMENT"]) {
-                $tableDefs[$curTable]['autoIncrement'] = $table['AUTO_INCREMENT'];
+                $tableDefs[$curTable]->setAutoIncrement((int) $table['AUTO_INCREMENT']);
             }
         }
-
-        ksort($tableDefs);
 
         $sql = "SELECT c.* FROM INFORMATION_SCHEMA.COLUMNS as c";
         $sql .= $whereClause;
@@ -228,28 +230,27 @@ class MysqlExtractor extends BaseExtractor
                     $length = $column['NUMERIC_PRECISION'];
                 }
             }
-            $curColumn = [
-                "name" => $column['COLUMN_NAME'],
-                "sanitizedName" => \Keboola\Utils\sanitizeColumnName($column['COLUMN_NAME']),
-                "type" => $column['DATA_TYPE'],
-                "primaryKey" => ($column['COLUMN_KEY'] === "PRI") ? true : false,
-                "length" => $length,
-                "nullable" => ($column['IS_NULLABLE'] === "NO") ? false : true,
-                "default" => $column['COLUMN_DEFAULT'],
-                "ordinalPosition" => $column['ORDINAL_POSITION'],
-            ];
+            $curColumn = new Column(
+                $column['COLUMN_NAME'],
+                \Keboola\Utils\sanitizeColumnName($column['COLUMN_NAME']),
+                $column['DATA_TYPE'],
+                ($column['COLUMN_KEY'] === "PRI") ? true : false,
+                $length,
+                ($column['IS_NULLABLE'] === "NO") ? false : true,
+                $column['COLUMN_DEFAULT'],
+                (int) $column['ORDINAL_POSITION']
+            );
 
             if ($column['COLUMN_COMMENT']) {
-                $curColumn['description'] = $column['COLUMN_COMMENT'];
+                $curColumn->setDescription($column['COLUMN_COMMENT']);
             }
 
             if ($column['EXTRA']) {
-                if ($column['EXTRA'] === 'auto_increment' && isset($tableDefs[$curTable]['autoIncrement'])) {
-                    $curColumn['autoIncrement'] = $tableDefs[$curTable]['autoIncrement'];
+                if ($column['EXTRA'] === 'auto_increment' && $tableDefs[$curTable]->getAutoIncrement()) {
+                    $curColumn->setAutoIncrement($tableDefs[$curTable]->getAutoIncrement());
                 }
             }
-            $tableDefs[$curTable]['columns'][$column['ORDINAL_POSITION'] - 1] = $curColumn;
-            ksort($tableDefs[$curTable]['columns']);
+            $tableDefs[$curTable]->addColumn($column['ORDINAL_POSITION'] - 1, $curColumn);
         }
 
         // add additional info
@@ -275,11 +276,11 @@ class MysqlExtractor extends BaseExtractor
                 if (count($curColumn) > 0) {
                     $curTableName = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
                     $filteredColumns = [];
-                    if (isset($tableDefs[$curTableName]['columns'])) {
+                    if ($tableDefs[$curTableName]->getColumns()) {
                         $filteredColumns = array_filter(
-                            $tableDefs[$curTableName]['columns'],
+                            $tableDefs[$curTableName]->getColumns(),
                             function ($existingCol) use ($column) {
-                                return $existingCol['name'] === $column['COLUMN_NAME'];
+                                return $existingCol->getName() === $column['COLUMN_NAME'];
                             }
                         );
                     }
@@ -291,9 +292,18 @@ class MysqlExtractor extends BaseExtractor
                             )
                         );
                     }
-                    $existingColumnKey = array_keys($filteredColumns)[0];
-                    foreach ($curColumn as $key => $value) {
-                        $tableDefs[$curTableName]['columns'][$existingColumnKey][$key] = $value;
+
+                    /** @var Column $filteredColumn */
+                    $filteredColumn = array_shift($filteredColumns);
+                    if (isset($curColumn['constraintName'])) {
+                        $filteredColumn->setConstraintName($curColumn['constraintName']);
+                    }
+                    if (isset($curColumn['foreignKeyRefSchema'])) {
+                        $filteredColumn->setForeignKeyReference(
+                            $curColumn['foreignKeyRefSchema'],
+                            $curColumn['foreignKeyRefTable'],
+                            $curColumn['foreignKeyRefColumn']
+                        );
                     }
                 }
             }
