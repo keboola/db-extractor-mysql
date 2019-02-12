@@ -71,7 +71,7 @@ class SslParameters
             $sslParameters['ca'],
             $sslParameters['cert'],
             $sslParameters['key'],
-            $sslParameters['cipher']
+            $sslParameters['cipher'],
             $sslParameters['verifyServerCert']
         );
     }

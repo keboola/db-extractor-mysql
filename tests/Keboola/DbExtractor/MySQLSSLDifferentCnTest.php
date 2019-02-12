@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
+use Keboola\Component\JsonHelper;
 use Keboola\Component\UserException;
 
 class MySQLSSLDifferentCnTest extends AbstractMySQLTest
@@ -50,7 +51,9 @@ class MySQLSSLDifferentCnTest extends AbstractMySQLTest
 
         $config['parameters']['db']['host'] = 'mysql-different-cn';
 
-        $result = $this->createApplication($config)->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals("success", $result['status']);
     }
@@ -72,7 +75,9 @@ class MySQLSSLDifferentCnTest extends AbstractMySQLTest
 
         $config['parameters']['db']['host'] = 'mysql-different-cn';
 
-        $result = $this->createApplication($config)->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals("success", $result['status']);
     }
