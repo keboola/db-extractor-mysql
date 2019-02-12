@@ -167,7 +167,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
 
         $tableCreated = false;
         while ($process->isRunning()) {
-            sleep(5);
+            sleep(1);
             if (!$tableCreated) {
                 $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
                 $csv1 = new CsvReader($csv1FilePath);
