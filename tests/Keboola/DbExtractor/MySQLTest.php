@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\Exception\UserException;
+use Keboola\Component\JsonHelper;
+use Keboola\Csv\CsvReader;
+use Keboola\Component\UserException;
 use Nette\Utils;
 
 class MySQLTest extends AbstractMySQLTest
@@ -19,7 +20,8 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['db']['networkCompression'] = true;
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -33,7 +35,8 @@ class MySQLTest extends AbstractMySQLTest
         unset($config['parameters']['db']['database']);
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -46,43 +49,48 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['tables'] = [];
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
     }
 
-    /**
-     * @param $configType
-     * @dataProvider configTypesProvider
-     */
-    public function testRunMain(string $configType): void
+    public function testRunMain(): void
     {
-        $config = $this->getConfig(self::DRIVER, $configType);
+        $config = $this->getConfig(self::DRIVER);
         $app = $this->createApplication($config);
 
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
 
-        $csv2 = new CsvFile($this->dataDir . '/mysql/escaping.csv');
-        $this->createTextTable($csv2);
+        $csv2FilePath = $this->dataDir . '/mysql/escaping.csv';
+        $csv2 = new CsvReader($csv2FilePath);
+        $this->createTextTable($csv2, $csv2FilePath);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv';
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
-        $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest');
-        $this->assertFileEquals((string) $csv1, $outputCsvFile);
+        $this->assertFileExists(
+            $this->dataDir . '/out/tables/' . $result['imported'][0]['outputTable'] . '.csv.manifest'
+        );
+        $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
 
         $outputCsvFile = $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv';
 
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
-        $this->assertFileExists($this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest');
-        $this->assertFileEquals((string) $csv2, $outputCsvFile);
+        $this->assertFileExists(
+            $this->dataDir . '/out/tables/' . $result['imported'][1]['outputTable'] . '.csv.manifest'
+        );
+        $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 
     public function testRunWithoutDatabase(): void
@@ -96,7 +104,8 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['tables'][1]['query'] = "SELECT * FROM test.escaping";
 
         $app = $this->createApplication($config);
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -123,7 +132,8 @@ class MySQLTest extends AbstractMySQLTest
 
         $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertEquals('success', $result['status']);
@@ -143,15 +153,17 @@ class MySQLTest extends AbstractMySQLTest
             'localPort' => '23306',
         ];
 
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
+
+        $csv2FilePath = $this->dataDir . '/mysql/escaping.csv';
+        $csv2 = new CsvReader($csv2FilePath);
+        $this->createTextTable($csv2, $csv2FilePath);
+
         $app = $this->createApplication($config);
-
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
-
-        $csv2 = new CsvFile($this->dataDir . '/mysql/escaping.csv');
-        $this->createTextTable($csv2);
-
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $sanitizedTable = Utils\Strings::webalize($result['imported'][0]['outputTable'], '._');
         $outputCsvFile = $this->dataDir . '/out/tables/' . $sanitizedTable . '.csv';
@@ -159,7 +171,7 @@ class MySQLTest extends AbstractMySQLTest
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest');
-        $this->assertFileEquals((string) $csv1, $outputCsvFile);
+        $this->assertFileEquals($csv1FilePath, $outputCsvFile);
 
         $sanitizedTable = Utils\Strings::webalize($result['imported'][1]['outputTable'], '._');
         $outputCsvFile = $this->dataDir . '/out/tables/' . $sanitizedTable . '.csv';
@@ -167,18 +179,21 @@ class MySQLTest extends AbstractMySQLTest
         $this->assertEquals('success', $result['status']);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest');
-        $this->assertFileEquals((string) $csv2, $outputCsvFile);
+        $this->assertFileEquals($csv2FilePath, $outputCsvFile);
     }
 
     public function testUserException(): void
     {
-        $this->setExpectedException('Keboola\DbExtractor\Exception\UserException');
-
         $config = $this->getConfig('mysql');
-
         $config['parameters']['db']['host'] = 'nonexistinghost';
+
         $app = $this->createApplication($config);
 
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            'DB query failed: SQLSTATE[HY000] [2002] php_network_getaddresses:'
+            . ' getaddrinfo failed: Name or service not known'
+        );
         $app->run();
     }
 
@@ -187,17 +202,20 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTable();
 
         // add a table to a different schema (should not be fetched)
+        $csvFilePath = $this->dataDir . '/mysql/sales.csv';
         $this->createTextTable(
-            new CsvFile($this->dataDir . '/mysql/sales.csv'),
+            new CsvReader($csvFilePath),
+            $csvFilePath,
             "ext_sales",
             "temp_schema"
         );
 
         $config = $this->getConfig();
         $config['action'] = 'getTables';
-        $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertArrayHasKey('status', $result);
         $this->assertArrayHasKey('tables', $result);
@@ -211,26 +229,29 @@ class MySQLTest extends AbstractMySQLTest
                     'name' => 'auto_increment_timestamp',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '2',
-                    'autoIncrement' => '3',
+                    'rowCount' => 2,
+                    'autoIncrement' => 3,
                     'columns' => $this->expectedTableColumns('test', 'auto_increment_timestamp'),
                     'description' => 'This is a table comment',
+                    'sanitizedName' => 'auto_increment_timestamp',
                 ),
             1 =>
                 array (
                     'name' => 'escaping',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '7',
+                    'rowCount' => 7,
                     'columns' => $this->expectedTableColumns('test', 'escaping'),
+                    'sanitizedName' => 'escaping',
                 ),
             2 =>
                 array (
                     'name' => 'sales',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '100',
+                    'rowCount' => 100,
                     'columns' => $this->expectedTableColumns('test', 'sales'),
+                    'sanitizedName' => 'sales',
                 ),
         );
         $this->assertEquals($expectedData, $result['tables']);
@@ -241,8 +262,10 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTable();
 
         // add a table to a different schema
+        $csvFilePath = $this->dataDir . '/mysql/sales.csv';
         $this->createTextTable(
-            new CsvFile($this->dataDir . '/mysql/sales.csv'),
+            new CsvReader($csvFilePath),
+            $csvFilePath,
             "ext_sales",
             "temp_schema"
         );
@@ -251,9 +274,10 @@ class MySQLTest extends AbstractMySQLTest
         $config['parameters']['tables'] = [];
         unset($config['parameters']['db']['database']);
         $config['action'] = 'getTables';
-        $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertGreaterThanOrEqual(4, count($result['tables']));
 
@@ -263,34 +287,38 @@ class MySQLTest extends AbstractMySQLTest
                     'name' => 'ext_sales',
                     'schema' => 'temp_schema',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '100',
+                    'rowCount' => 100,
                     'columns' => $this->expectedTableColumns('temp_schema', 'ext_sales'),
+                    'sanitizedName' => 'ext_sales',
                 ),
             1 =>
                 array (
                     'name' => 'auto_increment_timestamp',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '2',
-                    'autoIncrement' => '3',
+                    'rowCount' => 2,
+                    'autoIncrement' => 3,
                     'columns' => $this->expectedTableColumns('test', 'auto_increment_timestamp'),
                     'description' => 'This is a table comment',
+                    'sanitizedName' => 'auto_increment_timestamp',
                 ),
             2 =>
                 array (
                     'name' => 'escaping',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '7',
+                    'rowCount' => 7,
                     'columns' => $this->expectedTableColumns('test', 'escaping'),
+                    'sanitizedName' => 'escaping',
                 ),
             3 =>
                 array (
                     'name' => 'sales',
                     'schema' => 'test',
                     'type' => 'BASE TABLE',
-                    'rowCount' => '100',
+                    'rowCount' => 100,
                     'columns' => $this->expectedTableColumns('test', 'sales'),
+                    'sanitizedName' => 'sales',
                 ),
         );
         $this->assertEquals($expectedTables, $result['tables']);
@@ -323,16 +351,13 @@ class MySQLTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTableWithFK();
 
         $app = $this->createApplication($config);
-
-        $result = $app->run();
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $importedTable = ($isConfigRow) ? $result['imported']['outputTable'] : $result['imported'][0]['outputTable'];
 
         $sanitizedTable = Utils\Strings::webalize($importedTable, '._');
-        $outputManifest = json_decode(
-            file_get_contents($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest'),
-            true
-        );
+        $outputManifest = JsonHelper::readFile($this->dataDir . '/out/tables/' . $sanitizedTable . '.csv.manifest');
 
         $this->assertArrayHasKey('destination', $outputManifest);
         $this->assertArrayHasKey('incremental', $outputManifest);
@@ -343,7 +368,8 @@ class MySQLTest extends AbstractMySQLTest
             'KBC.type' => 'BASE TABLE',
             'KBC.rowCount' => 1,
             'KBC.description' => 'This is a table comment',
-            'KBC.autoIncrement' => '2',
+            'KBC.autoIncrement' => 2,
+            'KBC.sanitizedName' => 'auto_increment_timestamp_withFK',
         ];
         $tableMetadata = [];
         foreach ($outputManifest['metadata'] as $i => $metadata) {
@@ -401,18 +427,18 @@ class MySQLTest extends AbstractMySQLTest
                         ),
                     8 =>
                         array (
-                            'key' => 'KBC.description',
-                            'value' => 'This is a weird ID',
+                            'key' => 'KBC.autoIncrement',
+                            'value' => 2,
                         ),
                     9 =>
                         array (
-                            'key' => 'KBC.autoIncrement',
-                            'value' => '2',
+                            'key' => 'KBC.constraintName',
+                            'value' => 'PRIMARY',
                         ),
                     10 =>
                         array (
-                            'key' => 'KBC.constraintName',
-                            'value' => 'PRIMARY',
+                            'key' => 'KBC.description',
+                            'value' => 'This is a weird ID',
                         ),
                 ),
             'random_name' =>
@@ -555,13 +581,13 @@ class MySQLTest extends AbstractMySQLTest
                         ),
                     8 =>
                         array (
-                            'key' => 'KBC.description',
-                            'value' => 'This is a foreign key',
+                            'key' => 'KBC.constraintName',
+                            'value' => 'auto_increment_timestamp_withFK_ibfk_1',
                         ),
                     9 =>
                         array (
-                            'key' => 'KBC.constraintName',
-                            'value' => 'auto_increment_timestamp_withFK_ibfk_1',
+                            'key' => 'KBC.description',
+                            'value' => 'This is a foreign key',
                         ),
                     10 =>
                         array (
@@ -585,8 +611,10 @@ class MySQLTest extends AbstractMySQLTest
 
     public function testSchemaNotEqualToDatabase(): void
     {
+        $csvPath = $this->dataDir . '/mysql/sales.csv';
         $this->createTextTable(
-            new CsvFile($this->dataDir . '/mysql/sales.csv'),
+            new CsvReader($csvPath),
+            $csvPath,
             "ext_sales",
             "temp_schema"
         );
@@ -597,29 +625,30 @@ class MySQLTest extends AbstractMySQLTest
         unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
 
-        try {
-            $app = $this->createApplication($config);
-            $app->run();
-            $this->fail('table schema and database mismatch');
-        } catch (\Keboola\DbExtractor\Exception\UserException $e) {
-            $this->assertStringStartsWith("Invalid Configuration", $e->getMessage());
-        }
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            'Invalid configuration for path "root.parameters": Table schema and database mismatch.'
+        );
+        $this->createApplication($config);
     }
 
     public function testThousandsOfTables(): void
     {
         $this->markTestSkipped("No need to run this test every time.");
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
 
         for ($i = 0; $i < 3500; $i++) {
-            $this->createTextTable($csv1, "sales_" . $i);
+            $this->createTextTable($csv1, $csv1FilePath, "sales_" . $i);
         }
 
         $config = $this->getConfig();
         $config['action'] = 'getTables';
-        $app = $this->createApplication($config);
 
-        $result = $app->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
+
         echo "\nThere are " . count($result['tables']) . " tables\n";
     }
 
@@ -628,7 +657,9 @@ class MySQLTest extends AbstractMySQLTest
         $config = $this->getIncrementalFetchingConfig();
         $this->createAutoIncrementAndTimestampTable();
 
-        $result = ($this->createApplication($config))->run();
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
 
         $this->assertEquals('success', $result['status']);
         $this->assertEquals(
@@ -639,7 +670,7 @@ class MySQLTest extends AbstractMySQLTest
             $result['imported']
         );
         $outputManifestFile = $this->dataDir . '/out/tables/' . $result['imported']['outputTable'] . '.csv.manifest';
-        $manifest = json_decode(file_get_contents($outputManifestFile), true);
+        $manifest = JsonHelper::readFile($outputManifestFile);
         $expectedColumns = ['weird_I_d', 'weird_Name', 'timestamp', 'datetime', 'intColumn', 'decimalColumn'];
         $this->assertEquals($expectedColumns, $manifest['columns']);
         $this->assertEquals(['weird_I_d'], $manifest['primary_key']);
@@ -649,7 +680,12 @@ class MySQLTest extends AbstractMySQLTest
     {
         $config = $this->getIncrementalFetchingConfig();
         $config['parameters']['db']['networkCompression'] = true;
-        $result = ($this->createApplication($config))->run();
+
+        $app = $this->createApplication($config);
+        $stdout = $this->runApplication($app);
+        $result = JsonHelper::decode($stdout);
+
+
         $this->assertEquals(
             [
                 'outputTable' => 'in.c-main.auto-increment-timestamp',
@@ -673,11 +709,10 @@ class MySQLTest extends AbstractMySQLTest
             'tableName' => 'ext_sales',
             'schema' => 'temp_schema',
         ];
-        try {
-            ($this->createApplication($config))->run();
-            $this->fail('Should throw a user exception.');
-        } catch (UserException $e) {
-            $this->assertStringStartsWith("Invalid Configuration [ext_sales]", $e->getMessage());
-        }
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            'Invalid configuration for path "root.parameters": Table schema and database mismatch.'
+        );
+        $this->createApplication($config);
     }
 }

@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
-use Keboola\DbExtractor\Exception\UserException;
-use Keboola\DbExtractor\Logger;
-use Keboola\DbExtractor\MySQLApplication;
-use Keboola\DbExtractor\Test\ExtractorTest;
+use Keboola\Component\Logger;
+use Keboola\Component\UserException;
+use Keboola\Csv\CsvReader;
+use Keboola\DbExtractorCommon\Tests\ExtractorTest;
+use Keboola\MysqlExtractor\MysqlExtractor;
 use Symfony\Component\Filesystem\Filesystem;
 use PDO;
 
@@ -60,16 +60,24 @@ abstract class AbstractMySQLTest extends ExtractorTest
         $this->pdo->exec('CREATE TABLE auto_increment_timestamp (
             `_weird-I-d` INT NOT NULL AUTO_INCREMENT COMMENT \'This is a weird ID\',
             `weird-Name` VARCHAR(30) NOT NULL DEFAULT \'pam\' COMMENT \'This is a weird name\',
-            `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT \'This is a timestamp\',
-            `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT \'This is a datetime\',
+            `timestamp` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP'
+            . ' ON UPDATE CURRENT_TIMESTAMP COMMENT \'This is a timestamp\',
+            `datetime` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP'
+            . ' ON UPDATE CURRENT_TIMESTAMP COMMENT \'This is a datetime\',
             `intColumn` INT DEFAULT 1,
             `decimalColumn` DECIMAL(10,2) DEFAULT 10.2,
             PRIMARY KEY (`_weird-I-d`)  
         ) COMMENT=\'This is a table comment\'');
-        $this->pdo->exec('INSERT INTO auto_increment_timestamp (`weird-Name`, `intColumn`, `decimalColumn`) VALUES (\'george\', 2, 20.2)');
+        $this->pdo->exec(
+            'INSERT INTO auto_increment_timestamp (`weird-Name`, `intColumn`, `decimalColumn`)'
+            . ' VALUES (\'george\', 2, 20.2)'
+        );
         // Stagger the new column input timestamps
         sleep(1);
-        $this->pdo->exec('INSERT INTO auto_increment_timestamp (`weird-Name`, `intColumn`, `decimalColumn`) VALUES (\'henry\', 3, 30.3)');
+        $this->pdo->exec(
+            'INSERT INTO auto_increment_timestamp (`weird-Name`, `intColumn`, `decimalColumn`)'
+            . ' VALUES (\'henry\', 3, 30.3)'
+        );
     }
 
     protected function createAutoIncrementAndTimestampTableWithFK(): void
@@ -84,37 +92,31 @@ abstract class AbstractMySQLTest extends ExtractorTest
             PRIMARY KEY (`some_primary_key`),
             FOREIGN KEY (`foreign_key`) REFERENCES auto_increment_timestamp (`_weird-I-d`) ON DELETE CASCADE 
         ) COMMENT=\'This is a table comment\'');
-        $this->pdo->exec('INSERT INTO auto_increment_timestamp_withFK (`random_name`, `foreign_key`) VALUES (\'sue\',1)');
+        $this->pdo->exec(
+            'INSERT INTO auto_increment_timestamp_withFK (`random_name`, `foreign_key`) VALUES (\'sue\',1)'
+        );
     }
 
-    public function getConfig(string $driver = self::DRIVER, string $format = self::CONFIG_FORMAT_YAML): array
+    public function getConfig(string $driver = self::DRIVER): array
     {
-        $config = parent::getConfig($driver, $format);
-        $config['parameters']['extractor_class'] = 'MySQL';
+        $config = parent::getConfig($driver);
         return $config;
     }
 
     public function getConfigRow(string $driver = self::DRIVER): array
     {
         $config = parent::getConfigRow($driver);
-        $config['parameters']['extractor_class'] = 'MySQL';
         return $config;
     }
 
-    protected function generateTableName(CsvFile $file): string
-    {
-        $tableName = sprintf(
-            '%s',
-            $file->getBasename('.' . $file->getExtension())
-        );
-
-        return $tableName;
-    }
-
-    protected function createTextTable(CsvFile $file, ?string $tableName = null, ?string $schemaName = null): void
-    {
+    protected function createTextTable(
+        CsvReader $csvReader,
+        string $filePath,
+        ?string $tableName = null,
+        ?string $schemaName = null
+    ): void {
         if (!$tableName) {
-            $tableName = $this->generateTableName($file);
+            $tableName = pathinfo($filePath, PATHINFO_FILENAME);
         }
 
         if (!$schemaName) {
@@ -137,12 +139,13 @@ abstract class AbstractMySQLTest extends ExtractorTest
                 ', ',
                 array_map(function ($column) {
                     return $column . ' text NULL';
-                }, $file->getHeader())
+                }, $csvReader->getHeader())
             )
         ));
 
+        $filePath = realpath($filePath);
         $query = "
-			LOAD DATA LOCAL INFILE '{$file}'
+			LOAD DATA LOCAL INFILE '{$filePath}'
 			INTO TABLE `{$schemaName}`.`{$tableName}`
 			CHARACTER SET utf8
 			FIELDS TERMINATED BY ','
@@ -153,20 +156,23 @@ abstract class AbstractMySQLTest extends ExtractorTest
 
         $this->pdo->exec($query);
 
-        $count = $this->pdo->query(sprintf('SELECT COUNT(*) AS itemsCount FROM %s.%s', $schemaName, $tableName))->fetchColumn();
-        $this->assertEquals($this->countTable($file), (int) $count);
+        /** @var \PDOStatement $stmt */
+        $stmt = $this->pdo->query(sprintf('SELECT COUNT(*) AS itemsCount FROM %s.%s', $schemaName, $tableName));
+        $count = $stmt->fetchColumn();
+        $this->assertEquals($this->countTable($csvReader), (int) $count);
     }
 
     /**
      * Count records in CSV (with headers)
      *
-     * @param CsvFile $file
+     * @param CsvReader $csvReader
+     *
      * @return int
      */
-    protected function countTable(CsvFile $file): int
+    protected function countTable(CsvReader $csvReader): int
     {
         $linesCount = 0;
-        foreach ($file as $i => $line) {
+        foreach ($csvReader as $i => $line) {
             // skip header
             if (!$i) {
                 continue;
@@ -178,28 +184,20 @@ abstract class AbstractMySQLTest extends ExtractorTest
         return $linesCount;
     }
 
-    public function createApplication(array $config, array $state = []): MySQLApplication
+    public function createApplication(array $config, array $state = []): MysqlExtractor
     {
-        $logger = new Logger('ex-db-mysql-tests');
-        $app = new MySQLApplication($config, $logger, $state, $this->dataDir);
-
+        putenv(sprintf('KBC_DATADIR=%s', $this->dataDir));
+        $this->prepareConfigInDataDir($config);
+        $this->prepareInputStateInDataDir($state);
+        $app = new MysqlExtractor(new Logger());
         return $app;
-    }
-
-    public function configTypesProvider(): array
-    {
-        return [
-            [self::CONFIG_FORMAT_YAML],
-            [self::CONFIG_FORMAT_JSON],
-        ];
     }
 
     public function configProvider(): array
     {
         $this->dataDir = __DIR__ . '/../../data';
         return [
-            [$this->getConfig(self::DRIVER, self::CONFIG_FORMAT_YAML)],
-            [$this->getConfig(self::DRIVER, self::CONFIG_FORMAT_JSON)],
+            [$this->getConfig(self::DRIVER)],
             [$this->getConfigRow()],
         ];
     }
@@ -361,7 +359,7 @@ abstract class AbstractMySQLTest extends ExtractorTest
             } else {
                 throw new UserException(sprintf("Unexpected test table %s in schema %s", $table, $schema));
             }
-        } else if ($schema = "test") {
+        } else if ($schema === "test") {
             switch ($table) {
                 case "sales":
                     return array (

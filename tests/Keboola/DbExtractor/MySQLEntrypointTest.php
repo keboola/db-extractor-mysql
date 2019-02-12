@@ -2,22 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Keboola\DbExtractor\Tests;
+namespace Keboola\MysqlExtractor\Tests\Keboola\DbExtractor;
 
-use Keboola\Csv\CsvFile;
+use Keboola\Component\JsonHelper;
+use Keboola\Csv\CsvReader;
 use Symfony\Component\Filesystem;
 use Symfony\Component\Process\Process;
-use Symfony\Component\Yaml\Yaml;
 
 class MySQLEntrypointTest extends AbstractMySQLTest
 {
     /** @var string */
     protected $rootPath = __DIR__ . '/../../..';
 
-    /**
-     * @dataProvider configTypesProvider
-     */
-    public function testRunAction(string $configType): void
+    public function testRunAction(): void
     {
         $outputCsvFile = $this->dataDir . '/out/tables/in.c-main.sales.csv';
         $outputCsvFile2 = $this->dataDir . '/out/tables/in.c-main.escaping.csv';
@@ -26,22 +23,20 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         @unlink($outputCsvFile2);
 
         @unlink($this->dataDir . '/config.json');
-        @unlink($this->dataDir . '/config.yml');
 
-        $config = $this->getConfig(self::DRIVER, $configType);
-        if ($configType === 'json') {
-            file_put_contents($this->dataDir . '/config.json', json_encode($config));
-        } else {
-            file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
-        }
+        $config = $this->getConfig(self::DRIVER);
+        $this->prepareConfigInDataDir($config);
 
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
 
-        $csv2 = new CsvFile($this->dataDir . '/mysql/escaping.csv');
-        $this->createTextTable($csv2);
+        $csv2FilePath = $this->dataDir . '/mysql/escaping.csv';
+        $csv2 = new CsvReader($csv2FilePath);
+        $this->createTextTable($csv2, $csv2FilePath);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -51,20 +46,21 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $this->assertEquals(0, $process->getExitCode());
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/in.c-main.sales.csv.manifest');
-        $this->assertFileEquals((string) $csv1, $outputCsvFile);
+        $this->assertFileEquals($csv1FilePath, $outputCsvFile);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/in.c-main.escaping.csv.manifest');
-        $this->assertFileEquals((string) $csv2, $outputCsvFile2);
+        $this->assertFileEquals($csv2FilePath, $outputCsvFile2);
     }
 
     public function testTestConnectionAction(): void
     {
         $config = $this->getConfig();
-        @unlink($this->dataDir . '/config.yml');
+        @unlink($this->dataDir . '/config.json');
         $config['action'] = 'testConnection';
-        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+        $this->prepareConfigInDataDir($config);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
         $this->assertJson($process->getOutput());
@@ -75,7 +71,7 @@ class MySQLEntrypointTest extends AbstractMySQLTest
     public function testTestConnectionActionWithSSH(): void
     {
         $config = $this->getConfig();
-        @unlink($this->dataDir . '/config.yml');
+        @unlink($this->dataDir . '/config.json');
         $config['action'] = 'testConnection';
         $config['parameters']['db']['ssh'] = [
             'enabled' => true,
@@ -89,9 +85,10 @@ class MySQLEntrypointTest extends AbstractMySQLTest
             'remotePort' => $this->getEnv('mysql', 'DB_PORT'),
             'localPort' => '15211',
         ];
-        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+        $this->prepareConfigInDataDir($config);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
         $this->assertJson($process->getOutput());
@@ -103,10 +100,11 @@ class MySQLEntrypointTest extends AbstractMySQLTest
     {
         $config = $this->getConfig();
         $config['action'] = "getTables";
-        @unlink($this->dataDir . '/config.yml');
-        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+        @unlink($this->dataDir . '/config.json');
+        $this->prepareConfigInDataDir($config);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -124,22 +122,22 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config = $this->getConfig();
         unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
-        @unlink($this->dataDir . '/config.yml');
-        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+        @unlink($this->dataDir . '/config.json');
+        $this->prepareConfigInDataDir($config);
 
-        $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-        $this->createTextTable($csv1);
+        $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+        $csv1 = new CsvReader($csv1FilePath);
+        $this->createTextTable($csv1, $csv1FilePath);
 
-        $expectedOutput = new CsvFile($this->dataDir . '/mysql/tableColumns.csv');
-
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
         $this->assertEquals(0, $process->getExitCode());
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/in.c-main.tablecolumns.csv.manifest');
-        $this->assertFileEquals((string) $expectedOutput, $outputCsvFile);
+        $this->assertFileEquals($this->dataDir . '/mysql/tableColumns.csv', $outputCsvFile);
         $this->assertFileExists($outputCsvFile);
     }
 
@@ -154,12 +152,13 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         unset($config['parameters']['tables'][0]);
         unset($config['parameters']['tables'][1]);
 
-        @unlink($this->dataDir . '/config.yml');
-        file_put_contents($this->dataDir . '/config.yml', Yaml::dump($config));
+        @unlink($this->dataDir . '/config.json');
+        $this->prepareConfigInDataDir($config);
 
         // try exporting before the table exists
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->start();
 
@@ -168,10 +167,11 @@ class MySQLEntrypointTest extends AbstractMySQLTest
 
         $tableCreated = false;
         while ($process->isRunning()) {
-            sleep(5);
+            sleep(1);
             if (!$tableCreated) {
-                $csv1 = new CsvFile($this->dataDir . '/mysql/sales.csv');
-                $this->createTextTable($csv1, $table['tableName']);
+                $csv1FilePath = $this->dataDir . '/mysql/sales.csv';
+                $csv1 = new CsvReader($csv1FilePath);
+                $this->createTextTable($csv1, $csv1FilePath, $table['tableName']);
                 $tableCreated = true;
             }
         }
@@ -179,12 +179,10 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         // check that it had to retry at least 2x
         $this->assertContains('[2x]', $process->getOutput());
 
-        $expectedOutput = new CsvFile($this->dataDir . '/mysql/tableColumns.csv');
-
         $this->assertEquals(0, $process->getExitCode());
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/in.c-main.tablecolumns.csv.manifest');
-        $this->assertFileEquals((string) $expectedOutput, $outputCsvFile);
+        $this->assertFileEquals($this->dataDir . '/mysql/tableColumns.csv', $outputCsvFile);
         $this->assertFileExists($outputCsvFile);
     }
 
@@ -199,23 +197,20 @@ class MySQLEntrypointTest extends AbstractMySQLTest
 
         $config = $this->getConfigRow(self::DRIVER);
 
-        @unlink($this->dataDir . '/config.yml');
         @unlink($this->dataDir . '/config.json');
+        $this->prepareConfigInDataDir($config);
 
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
-
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
-
-        $expectedOutput = new CsvFile($this->dataDir . '/mysql/escaping.csv');
 
         $this->assertEquals(0, $process->getExitCode());
         // state file should not be written if state is empty
         $this->assertFileNotExists($outputStateFile);
         $this->assertFileExists($outputCsvFile);
         $this->assertFileExists($this->dataDir . '/out/tables/in.c-main.escaping.csv.manifest');
-        $this->assertFileEquals((string) $expectedOutput, $outputCsvFile);
+        $this->assertFileEquals($this->dataDir . '/mysql/escaping.csv', $outputCsvFile);
         $this->assertFileExists($outputCsvFile);
     }
 
@@ -224,7 +219,6 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $this->createAutoIncrementAndTimestampTable();
         $config = $this->getConfigRow(self::DRIVER);
 
-        @unlink($this->dataDir . '/config.yml');
         @unlink($this->dataDir . '/config.json');
 
         $inputStateFile = $this->dataDir . '/in/state.json';
@@ -250,9 +244,10 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         $config['parameters']['primaryKey'] = ['_weird-I-d'];
         $config['parameters']['incrementalFetchingColumn'] = '_weird-I-d';
 
-        file_put_contents($this->dataDir . '/config.json', json_encode($config));
+        $this->prepareConfigInDataDir($config);
 
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -260,7 +255,10 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         var_dump($process->getOutput());
         $this->assertEquals(0, $process->getExitCode());
         $this->assertFileExists($outputStateFile);
-        $this->assertEquals(['lastFetchedRow' => '2'], json_decode(file_get_contents($outputStateFile), true));
+        $this->assertEquals(
+            ['lastFetchedRow' => '2'],
+            JsonHelper::readFile($outputStateFile)
+        );
 
         // add a couple rows
         $this->pdo->exec('INSERT INTO auto_increment_timestamp (`weird-Name`) VALUES (\'charles\'), (\'william\')');
@@ -269,7 +267,8 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         file_put_contents($inputStateFile, file_get_contents($outputStateFile));
 
         // run the config again
-        $process = new Process('php ' . $this->rootPath . '/src/run.php --data=' . $this->dataDir);
+        $process = new Process('php ' . $this->rootPath . '/src/run.php');
+        $process->setEnv(['KBC_DATADIR' => $this->dataDir]);
         $process->setTimeout(300);
         $process->run();
 
@@ -277,6 +276,9 @@ class MySQLEntrypointTest extends AbstractMySQLTest
         var_dump($process->getOutput());
 
         $this->assertEquals(0, $process->getExitCode());
-        $this->assertEquals(['lastFetchedRow' => '4'], json_decode(file_get_contents($outputStateFile), true));
+        $this->assertEquals(
+            ['lastFetchedRow' => '4'],
+            JsonHelper::readFile($outputStateFile)
+        );
     }
 }

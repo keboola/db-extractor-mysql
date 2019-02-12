@@ -1,0 +1,593 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Keboola\MysqlExtractor;
+
+use Keboola\Component\UserException;
+use Keboola\Csv\CsvWriter;
+use Keboola\Datatype\Definition\MySQL as MysqlDatatype;
+use Keboola\DbExtractorCommon\BaseExtractor;
+use Keboola\DbExtractorCommon\Configuration\BaseExtractorConfig;
+use Keboola\DbExtractorCommon\Configuration\TableDetailParameters;
+use Keboola\DbExtractorCommon\Configuration\TableParameters;
+use Keboola\DbExtractorCommon\Exception\ApplicationException;
+use Keboola\DbExtractorCommon\Exception\DeadConnectionException;
+use Keboola\DbExtractorCommon\RetryProxy;
+use Keboola\MysqlExtractor\Configuration\Config;
+use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigActionDefinition;
+use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigDefinition;
+use Keboola\MysqlExtractor\Configuration\Definition\MySQLConfigRowDefinition;
+use Keboola\MysqlExtractor\DatabaseMetadata\Column;
+use Keboola\MysqlExtractor\DatabaseMetadata\Table;
+use Keboola\Temp\Temp;
+
+class MysqlExtractor extends BaseExtractor
+{
+    public const INCREMENT_TYPE_NUMERIC = 'numeric';
+    public const INCREMENT_TYPE_TIMESTAMP = 'timestamp';
+    public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
+
+    /**
+     * @var \PDO|null
+     */
+    private $db;
+
+    /** @var array|null */
+    private $incrementalFetching;
+
+    protected function getConfigClass(): string
+    {
+        return Config::class;
+    }
+
+    protected function getConfigDefinitionClass(): string
+    {
+        $configRaw = $this->getRawConfig();
+        $action = $configRaw['action'];
+        $isConfigRow = !isset($configRaw['parameters']['tables']);
+
+        if ($action !== 'run') {
+            return MySQLConfigActionDefinition::class;
+        } elseif ($isConfigRow) {
+            return MySQLConfigRowDefinition::class;
+        } else {
+            return MySQLConfigDefinition::class;
+        }
+    }
+
+    public function extract(BaseExtractorConfig $config): array
+    {
+        $imported = [];
+        $outputState = [];
+
+        $tableParameters = $config->getConfigRowTableParameters();
+        if ($tableParameters) {
+            $exportResults = $this->extractTable($tableParameters);
+            if (isset($exportResults['state'])) {
+                $outputState = $exportResults['state'];
+                unset($exportResults['state']);
+            }
+            $imported = $exportResults;
+        } else {
+            foreach ($config->getEnabledTables() as $table) {
+                $exportResults = $this->extractTable($table);
+                $imported[] = $exportResults;
+            }
+        }
+
+        return [
+            'status' => 'success',
+            'imported' => $imported,
+            'state' => $outputState,
+        ];
+    }
+
+    private function extractTable(TableParameters $table): array
+    {
+        $outputTable = $table->getOutputTable();
+
+        $this->getLogger()->info("Exporting to " . $outputTable);
+
+        if (!$table->isAdvancedQuery()) {
+            $query = $this->simpleQuery($table->getTableDetail(), $table->getColumns());
+        } else {
+            $query = $table->getQuery();
+        }
+
+        $maxTries = $table->getRetries();
+
+        // this will retry on CsvException
+        $proxy = new RetryProxy(
+            $this->getLogger(),
+            $maxTries,
+            RetryProxy::DEFAULT_BACKOFF_INTERVAL,
+            [\PDOException::class, DeadConnectionException::class, \ErrorException::class]
+        );
+        try {
+            $result = $proxy->call(function () use ($query, $outputTable, $table) {
+                $stmt = $this->executeQuery($query);
+                $csvWriter = $this->createOutputCsv($outputTable);
+                $result = $this->writeToCsv($stmt, $csvWriter, $table->isAdvancedQuery());
+                $this->checkConnectionIsAlive();
+                return $result;
+            });
+        } catch (\Keboola\Csv\Exception $e) {
+            throw new ApplicationException("Failed writing CSV File: " . $e->getMessage(), $e->getCode(), $e);
+        } catch (\PDOException $e) {
+            throw $this->handleDbError($e, $table, $maxTries);
+        } catch (\ErrorException $e) {
+            throw $this->handleDbError($e, $table, $maxTries);
+        } catch (DeadConnectionException $e) {
+            throw $this->handleDbError($e, $table, $maxTries);
+        }
+
+        if ($result['rows'] > 0) {
+            $this->createManifest($table);
+        } else {
+            unlink($this->getOutputFilePath($outputTable));
+            $this->getLogger()->warning(
+                sprintf(
+                    'Query returned empty result. Nothing was imported to "%s"',
+                    $table->getOutputTable()
+                )
+            );
+        }
+
+        $output = [
+            'outputTable' => $outputTable,
+            'rows' => $result['rows'],
+        ];
+        // output state
+        if (!empty($result['lastFetchedRow'])) {
+            $output['state']['lastFetchedRow'] = $result['lastFetchedRow'];
+        }
+        return $output;
+    }
+
+    private function executeQuery(string $query): \PDOStatement
+    {
+        $stmt = $this->getConnection()->prepare($query);
+        $stmt->execute();
+        return $stmt;
+    }
+
+    public function getTables(array $tables = []): array
+    {
+        /** @var Config $config */
+        $config = $this->getConfig();
+
+        $sql = "SELECT * FROM INFORMATION_SCHEMA.TABLES as c";
+
+        $whereClause = " WHERE c.TABLE_SCHEMA != 'performance_schema' 
+                          AND c.TABLE_SCHEMA != 'mysql'
+                          AND c.TABLE_SCHEMA != 'information_schema'
+                          AND c.TABLE_SCHEMA != 'sys'";
+
+        if ($config->getDbParameters()->getDatabase()) {
+            $whereClause = sprintf(
+                " WHERE c.TABLE_SCHEMA = %s",
+                $this->getConnection()->quote($config->getDbParameters()->getDatabase())
+            );
+        }
+
+        if (count($tables) > 0) {
+            $whereClause .= sprintf(
+                " AND c.TABLE_NAME IN (%s) AND c.TABLE_SCHEMA IN (%s)",
+                implode(',', array_map(function ($table) {
+                    return $this->getConnection()->quote($table->getTableName());
+                }, $tables)),
+                implode(',', array_map(function ($table) {
+                    return $this->getConnection()->quote($table->getSchema());
+                }, $tables))
+            );
+        }
+
+        $sql .= $whereClause;
+
+        /** @var \PDOStatement $res */
+        $res = $this->getConnection()->query($sql);
+        /** @var array $arr */
+        $arr = $res->fetchAll(\PDO::FETCH_ASSOC);
+        if (count($arr) === 0) {
+            return [];
+        }
+
+        /** @var Table[] $tableDefs */
+        $tableDefs = [];
+        foreach ($arr as $table) {
+            $curTable = $table['TABLE_SCHEMA'] . '.' . $table['TABLE_NAME'];
+            $tableDefs[$curTable] = new Table(
+                $table['TABLE_NAME'],
+                $table['TABLE_SCHEMA'] ?? '',
+                $table['TABLE_TYPE'] ?? '',
+                $table['TABLE_ROWS'] ? (int) $table['TABLE_ROWS'] : 0
+            );
+            if ($table["TABLE_COMMENT"]) {
+                $tableDefs[$curTable]->setDescription($table['TABLE_COMMENT']);
+            }
+            if ($table["AUTO_INCREMENT"]) {
+                $tableDefs[$curTable]->setAutoIncrement((int) $table['AUTO_INCREMENT']);
+            }
+        }
+
+        $sql = "SELECT c.* FROM INFORMATION_SCHEMA.COLUMNS as c";
+        $sql .= $whereClause;
+
+        /** @var \PDOStatement $res */
+        $res = $this->db->query($sql);
+        /** @var array $rows */
+        $rows = $res->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($rows as $i => $column) {
+            $curTable = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
+            $length = ($column['CHARACTER_MAXIMUM_LENGTH']) ? $column['CHARACTER_MAXIMUM_LENGTH'] : null;
+            if (is_null($length) && !is_null($column['NUMERIC_PRECISION'])) {
+                if ($column['NUMERIC_SCALE'] > 0) {
+                    $length = $column['NUMERIC_PRECISION'] . "," . $column['NUMERIC_SCALE'];
+                } else {
+                    $length = $column['NUMERIC_PRECISION'];
+                }
+            }
+            $curColumn = new Column(
+                $column['COLUMN_NAME'],
+                $column['DATA_TYPE'],
+                ($column['COLUMN_KEY'] === "PRI") ? true : false,
+                $length,
+                ($column['IS_NULLABLE'] === "NO") ? false : true,
+                $column['COLUMN_DEFAULT'],
+                (int) $column['ORDINAL_POSITION']
+            );
+
+            if ($column['COLUMN_COMMENT']) {
+                $curColumn->setDescription($column['COLUMN_COMMENT']);
+            }
+
+            if ($column['EXTRA']) {
+                if ($column['EXTRA'] === 'auto_increment' && $tableDefs[$curTable]->getAutoIncrement()) {
+                    $curColumn->setAutoIncrement($tableDefs[$curTable]->getAutoIncrement());
+                }
+            }
+            $tableDefs[$curTable]->addColumn($column['ORDINAL_POSITION'] - 1, $curColumn);
+        }
+
+        // add additional info
+        if (count($tables) > 0) {
+            $additionalSql = "SELECT TABLE_SCHEMA, TABLE_NAME, COLUMN_NAME, 
+                    CONSTRAINT_NAME, REFERENCED_TABLE_NAME, LOWER(REFERENCED_COLUMN_NAME) as REFERENCED_COLUMN_NAME, 
+                    REFERENCED_TABLE_SCHEMA FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS c ";
+
+            /** @var \PDOStatement $res */
+            $res = $this->db->query($additionalSql . $whereClause);
+            /** @var array $rows */
+            $rows = $res->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($rows as $column) {
+                $curColumn = [];
+                if (array_key_exists('CONSTRAINT_NAME', $column) && !is_null($column['CONSTRAINT_NAME'])) {
+                    $curColumn['constraintName'] = $column['CONSTRAINT_NAME'];
+                }
+                if (array_key_exists('REFERENCED_TABLE_NAME', $column) && !is_null($column['REFERENCED_TABLE_NAME'])) {
+                    $curColumn['foreignKeyRefSchema'] = $column['REFERENCED_TABLE_SCHEMA'];
+                    $curColumn['foreignKeyRefTable'] = $column['REFERENCED_TABLE_NAME'];
+                    $curColumn['foreignKeyRefColumn'] = $column['REFERENCED_COLUMN_NAME'];
+                }
+                if (count($curColumn) > 0) {
+                    $curTableName = $column['TABLE_SCHEMA'] . '.' . $column['TABLE_NAME'];
+                    $filteredColumns = [];
+                    if ($tableDefs[$curTableName]->getColumns()) {
+                        $filteredColumns = array_filter(
+                            $tableDefs[$curTableName]->getColumns(),
+                            function ($existingCol) use ($column) {
+                                return $existingCol->getName() === $column['COLUMN_NAME'];
+                            }
+                        );
+                    }
+                    if (count($filteredColumns) === 0) {
+                        throw new ApplicationException(
+                            sprintf(
+                                'This should never happen: Could not find reference column "%s" in table definition',
+                                $column['COLUMN_NAME']
+                            )
+                        );
+                    }
+
+                    /** @var Column $filteredColumn */
+                    $filteredColumn = array_shift($filteredColumns);
+                    if (isset($curColumn['constraintName'])) {
+                        $filteredColumn->setConstraintName($curColumn['constraintName']);
+                    }
+                    if (isset($curColumn['foreignKeyRefSchema'])) {
+                        $filteredColumn->setForeignKeyReference(
+                            $curColumn['foreignKeyRefSchema'],
+                            $curColumn['foreignKeyRefTable'],
+                            $curColumn['foreignKeyRefColumn']
+                        );
+                    }
+                }
+            }
+        }
+        return array_values($tableDefs);
+    }
+
+    public function testConnection(): void
+    {
+        $db = $this->getConnection();
+        /** @var \PDOStatement $stmt */
+        $stmt = $db->query('SELECT NOW();');
+        $stmt->execute();
+    }
+
+    public function createConnection(Config $config): \PDO
+    {
+        $databaseParameters = $config->getDbParameters();
+        $isSsl = false;
+
+        $options = [
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, // convert errors to PDOExceptions
+            \PDO::MYSQL_ATTR_COMPRESS => $config->isNetworkCompressionEnabled(), // network compression
+        ];
+
+        // ssl encryption
+        $sslParameters = $config->getSslParameters();
+        if ($sslParameters && $sslParameters->isEnabled()) {
+            $temp = new Temp(getenv('APP_NAME') ? getenv('APP_NAME') : 'ex-db-mysql');
+
+            if ($sslParameters->getKey()) {
+                $options[\PDO::MYSQL_ATTR_SSL_KEY] = $this->createSSLFile($sslParameters->getKey(), $temp);
+                $isSsl = true;
+            }
+            if ($sslParameters->getCert()) {
+                $options[\PDO::MYSQL_ATTR_SSL_CERT] = $this->createSSLFile($sslParameters->getCert(), $temp);
+                $isSsl = true;
+            }
+            if ($sslParameters->getCa()) {
+                $options[\PDO::MYSQL_ATTR_SSL_CA] = $this->createSSLFile($sslParameters->getCa(), $temp);
+                $isSsl = true;
+            }
+            if ($sslParameters->getCipher() !== '') {
+                $options[\PDO::MYSQL_ATTR_SSL_CIPHER] = $sslParameters->getCipher();
+            }
+            if ($sslParameters->getVerifyServerCert() === false) {
+                $options[\PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+            }
+        }
+
+        if ($databaseParameters->getDatabase()) {
+            $dsn = sprintf(
+                "mysql:host=%s;port=%s;dbname=%s;charset=utf8",
+                $databaseParameters->getHost(),
+                $databaseParameters->getPort(),
+                $databaseParameters->getDatabase()
+            );
+        } else {
+            $dsn = sprintf(
+                "mysql:host=%s;port=%s;charset=utf8",
+                $databaseParameters->getHost(),
+                $databaseParameters->getPort()
+            );
+        }
+
+        $this->getLogger()->info("Connecting to DSN '" . $dsn . "' " . ($isSsl ? 'Using SSL' : ''));
+
+        try {
+            $pdo = new \PDO($dsn, $databaseParameters->getUser(), $databaseParameters->getPassword(), $options);
+        } catch (\PDOException $e) {
+            $checkCnMismatch = function (\Throwable $exception): void {
+                if (strpos($exception->getMessage(), 'did not match expected CN') !== false) {
+                    throw new UserException($exception->getMessage());
+                }
+            };
+            $checkCnMismatch($e);
+            $previous = $e->getPrevious();
+            if ($previous !== null) {
+                $checkCnMismatch($previous);
+            }
+            throw $e;
+        }
+        $pdo->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+        $pdo->exec("SET NAMES utf8;");
+
+        if ($isSsl) {
+            /** @var \PDOStatement $stmt */
+            $stmt = $pdo->query("SHOW STATUS LIKE 'Ssl_cipher';");
+            $status = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (empty($status['Value'])) {
+                throw new UserException(sprintf("Connection is not encrypted"));
+            } else {
+                $this->getLogger()->info("Using SSL cipher: " . $status['Value']);
+            }
+        }
+
+        if ($config->isNetworkCompressionEnabled()) {
+            /** @var \PDOStatement $stmt */
+            $stmt = $pdo->query("SHOW SESSION STATUS LIKE 'Compression';");
+            $status = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (empty($status['Value']) || $status['Value'] !== 'ON') {
+                throw new UserException(sprintf("Network communication is not compressed"));
+            } else {
+                $this->getLogger()->info("Using network communication compression");
+            }
+        }
+
+        return $pdo;
+    }
+
+    private function createSSLFile(string $sslCa, Temp $temp): string
+    {
+        $filename = $temp->createTmpFile('ssl');
+        file_put_contents((string) $filename, $sslCa);
+        return (string) realpath((string) $filename);
+    }
+
+    public function getConnection(): \PDO
+    {
+        if (!$this->db) {
+            /** @var Config $config */
+            $config = $this->getConfig();
+
+            $this->db = $this->createConnection($config);
+        }
+        return $this->db;
+    }
+
+    public function validateIncrementalFetching(
+        TableDetailParameters $tableDetailParameters,
+        string $columnName,
+        ?int $limit = null
+    ): void {
+        $db = $this->getConnection();
+        /** @var \PDOStatement $res */
+        $res = $db->query(
+            sprintf(
+                'SELECT * FROM INFORMATION_SCHEMA.COLUMNS as cols 
+                            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s',
+                $db->quote($tableDetailParameters->getSchema()),
+                $db->quote($tableDetailParameters->getTableName()),
+                $db->quote($columnName)
+            )
+        );
+        /** @var array $columns */
+        $columns = $res->fetchAll();
+        if (count($columns) === 0) {
+            throw new UserException(
+                sprintf(
+                    'Column "%s" specified for incremental fetching was not found in the table',
+                    $columnName
+                )
+            );
+        }
+
+        try {
+            $datatype = new MysqlDatatype($columns[0]['DATA_TYPE']);
+            if (in_array($datatype->getBasetype(), self::NUMERIC_BASE_TYPES)) {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_NUMERIC;
+            } else if ($datatype->getBasetype() === 'TIMESTAMP') {
+                $this->incrementalFetching['column'] = $columnName;
+                $this->incrementalFetching['type'] = self::INCREMENT_TYPE_TIMESTAMP;
+            } else {
+                throw new UserException('invalid incremental fetching column type');
+            }
+        } catch (\Keboola\Datatype\Definition\Exception\InvalidLengthException | UserException $exception) {
+            throw new UserException(
+                sprintf(
+                    'Column "%s" specified for incremental fetching is not a numeric or timestamp type column',
+                    $columnName
+                )
+            );
+        }
+
+        if ($limit) {
+            $this->incrementalFetching['limit'] = $limit;
+        }
+    }
+
+    protected function quoteIdentifier(string $obj): string
+    {
+        return "`{$obj}`";
+    }
+
+    private function writeToCsv(\PDOStatement $stmt, CsvWriter $csvWriter, bool $includeHeader = true): array
+    {
+        $output = [];
+
+        $resultRow = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (is_array($resultRow) && !empty($resultRow)) {
+            // write header and first line
+            if ($includeHeader) {
+                $csvWriter->writeRow(array_keys($resultRow));
+            }
+            $csvWriter->writeRow($resultRow);
+
+            // write the rest
+            $numRows = 1;
+            $lastRow = $resultRow;
+
+            while ($resultRow = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                $csvWriter->writeRow($resultRow);
+                $lastRow = $resultRow;
+                $numRows++;
+            }
+            $stmt->closeCursor();
+
+            if (isset($this->incrementalFetching['column'])) {
+                if (!array_key_exists($this->incrementalFetching['column'], $lastRow)) {
+                    throw new UserException(
+                        sprintf(
+                            'The specified incremental fetching column "%s" not found in the table.'
+                            . ' Available columns "%s".',
+                            $this->incrementalFetching['column'],
+                            implode(', ', array_keys($resultRow))
+                        )
+                    );
+                }
+                $output['lastFetchedRow'] = $lastRow[$this->incrementalFetching['column']];
+            }
+            $output['rows'] = $numRows;
+            return $output;
+        }
+        // no rows found.  If incremental fetching is turned on, we need to preserve the last state
+        if ($this->incrementalFetching['column'] && isset($this->getInputState()['lastFetchedRow'])) {
+            $output = $this->getInputState();
+        }
+        $output['rows'] = 0;
+        return $output;
+    }
+
+    public function simpleQuery(TableDetailParameters $table, ?array $columns = array()): string
+    {
+        $incrementalAddon = null;
+        if ($this->incrementalFetching && isset($this->incrementalFetching['column'])) {
+            if (isset($this->getInputState()['lastFetchedRow'])) {
+                $incrementalAddon = sprintf(
+                    " WHERE %s >= %s",
+                    $this->quoteIdentifier($this->incrementalFetching['column']),
+                    $this->db->quote((string) $this->getInputState()['lastFetchedRow'])
+                );
+            }
+            $incrementalAddon .= sprintf(" ORDER BY %s", $this->quoteIdentifier($this->incrementalFetching['column']));
+        }
+        if (count($columns) > 0) {
+            $query = sprintf(
+                "SELECT %s FROM %s.%s",
+                implode(', ', array_map(function ($column): string {
+                    return $this->quoteIdentifier($column);
+                }, $columns)),
+                $this->quoteIdentifier($table->getSchema()),
+                $this->quoteIdentifier($table->getTableName())
+            );
+        } else {
+            $query = sprintf(
+                "SELECT * FROM %s.%s",
+                $this->quoteIdentifier($table->getSchema()),
+                $this->quoteIdentifier($table->getTableName())
+            );
+        }
+        if ($incrementalAddon) {
+            $query .= $incrementalAddon;
+        }
+        if (isset($this->incrementalFetching['limit'])) {
+            $query .= sprintf(
+                " LIMIT %d",
+                $this->incrementalFetching['limit']
+            );
+        }
+        return $query;
+    }
+
+    protected function handleDbError(\Throwable $e, ?TableParameters $table = null, ?int $counter = null): UserException
+    {
+        $message = "";
+        if ($table) {
+            $message = sprintf("[%s]: ", $table->getOutputTable());
+        }
+        $message .= sprintf('DB query failed: %s', $e->getMessage());
+        if ($counter) {
+            $message .= sprintf(' Tried %d times.', $counter);
+        }
+        return new UserException($message, 0, $e);
+    }
+}

@@ -1,7 +1,7 @@
 vendor/
 /data/
-/tests/data/in/
-/tests/data/out/
+/tests/data/in/state.json
+/tests/data/out/state.json
 /tests/data/config.yml
 /tests/data/config.json
 .idea/
