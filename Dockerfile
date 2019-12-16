@@ -1,5 +1,5 @@
 FROM keboola/db-component-ssh-proxy:latest AS sshproxy
-FROM php:7.3-cli-stretch
+FROM php:7.4-cli
 
 ENV COMPOSER_ALLOW_SUPERUSER=1
 

@@ -10,8 +10,7 @@ use Symfony\Component\Process\Process;
 
 class MySQLEntrypointTest extends AbstractMySQLTest
 {
-    /** @var string */
-    protected $rootPath = __DIR__ . '/../../..';
+    protected string $rootPath = __DIR__ . '/../../..';
 
     public function testRunAction(): void
     {

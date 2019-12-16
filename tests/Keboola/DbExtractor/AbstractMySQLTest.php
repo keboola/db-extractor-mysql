@@ -16,8 +16,7 @@ abstract class AbstractMySQLTest extends ExtractorTest
 {
     public const DRIVER = 'mysql';
 
-    /** @var PDO */
-    protected $pdo;
+    protected PDO $pdo;
 
     public function setUp(): void
     {

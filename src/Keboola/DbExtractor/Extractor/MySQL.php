@@ -19,8 +19,7 @@ class MySQL extends Extractor
     public const INCREMENT_TYPE_TIMESTAMP = 'timestamp';
     public const NUMERIC_BASE_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT'];
 
-    /** @var  string -- database name from connection parameters */
-    protected $database;
+    protected string $database;
 
     private function createSSLFile(string $sslCa, Temp $temp): string
     {
