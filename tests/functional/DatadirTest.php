@@ -36,7 +36,7 @@ class DatadirTest extends DatadirTestCase
 
         putenv('SSH_PRIVATE_KEY=' . (string) file_get_contents('/root/.ssh/id_rsa'));
         putenv('SSH_PUBLIC_KEY=' . (string) file_get_contents('/root/.ssh/id_rsa.pub'));
-        putenv('SSL_CA=' . (string) file_get_contents('/ssl-cert/ca.pem'));
+        putenv('SSL_CA=' . (string) file_get_contents('/ssl-cert/ca-cert.pem'));
         putenv('SSL_CERT=' . (string) file_get_contents('/ssl-cert/client-cert.pem'));
         putenv('SSL_KEY=' . (string) file_get_contents('/ssl-cert/client-key.pem'));
     }
@@ -55,7 +55,8 @@ class DatadirTest extends DatadirTestCase
         $this->testProjectDir = $this->getTestFileDir() . '/' . $this->dataName();
         $this->testTempDir = $this->temp->getTmpFolder();
 
-        $this->connection = PdoTestConnection::createConnection();
+        $isSsl = strpos((string) $this->dataName(), 'ssl-') === 0;
+        $this->connection = PdoTestConnection::createConnection($isSsl);
         $this->removeAllTables();
         $this->closeSshTunnels();
 
