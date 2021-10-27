@@ -53,4 +53,50 @@ class ConfigTest extends TestCase
             ],
         ];
     }
+
+    /**
+     * @dataProvider invalidConfigProvider
+     */
+    public function testInvalid(array $config): void
+    {
+        new MySQLApplication($config, new TestLogger());
+        $this->expectExceptionMessage('x');
+        $this->expectNotToPerformAssertions();
+    }
+
+    public function invalidConfigProvider(): array
+    {
+        return [
+            'no-database' => [
+                [
+                    'parameters' => [
+                        'db' => [
+                            'host' => 'mysql',
+                            'user' => 'root',
+                            '#password' => 'rootpassword',
+                            'port' => 3306,
+                            'ssl' => ['cert' => 'abs']
+                        ],
+                        'query' => 'SELECT * FROM escaping',
+                        'outputTable' => 'in.c-main.escaping',
+                    ],
+                ],
+            ],
+            'empty-database' => [
+                [
+                    'parameters' => [
+                        'db' => [
+                            'host' => 'mysql',
+                            'user' => 'root',
+                            '#password' => 'rootpassword',
+                            'database' => '',
+                            'port' => 3306,
+                        ],
+                        'query' => 'SELECT * FROM escaping',
+                        'outputTable' => 'in.c-main.escaping',
+                    ],
+                ],
+            ],
+        ];
+    }
 }
