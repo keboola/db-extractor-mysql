@@ -83,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run KBC test jobs
-        uses: keboola/action-run-configs-parallel@master
+        uses: keboola/action-run-configs-parallel@use-kac-cli
         with:
           token: ${{ env.KBC_STORAGE_TOKEN }}
           componentId: ${{ env.KBC_DEVELOPERPORTAL_APP }}
