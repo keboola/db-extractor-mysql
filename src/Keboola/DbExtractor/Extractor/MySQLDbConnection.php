@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\DbExtractor\Adapter\PDO\PdoConnection;
 use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractor\Adapter\ValueObject\QueryResult;
 use PDOException;
 use Retry\BackOff\ExponentialBackOffPolicy;
 use Retry\Policy\SimpleRetryPolicy;
@@ -20,6 +21,8 @@ class MySQLDbConnection extends PdoConnection
 
     protected function connect(): void
     {
+        $this->logger->notice(sprintf('Set PDO options: %s', implode(",", $this->options)));
+
         try {
             parent::connect();
         } catch (PDOException $e) {
@@ -52,5 +55,19 @@ class MySQLDbConnection extends PdoConnection
         $retryPolicy = new SimpleRetryPolicy($maxRetries, $this->getExpectedExceptionClasses());
         $backoffPolicy = new ExponentialBackOffPolicy(2000, null, self::RETRY_MAX_INTERVAL);
         return new RetryProxy($retryPolicy, $backoffPolicy, $this->logger);
+    }
+
+    public function doQuery(string $query): QueryResult
+    {
+        $this->logger->notice(sprintf('Query: %s', $query));
+
+        return parent::doQuery($query);
+    }
+
+    public function quote(string $str): string
+    {
+        $this->logger->notice(sprintf('Set PDO quote: %s', $str));
+
+        return parent::quote($str);
     }
 }
