@@ -38,7 +38,7 @@ class MySQL extends BaseExtractor
     {
         $resultWriter = new DefaultResultWriter($this->state);
         $simpleQueryFactory = new DefaultQueryFactory($this->state);
-        return new PdoExportVerboseLogAdapter(
+        return new PdoExportAdapter(
             $this->logger,
             $this->connection,
             $simpleQueryFactory,
