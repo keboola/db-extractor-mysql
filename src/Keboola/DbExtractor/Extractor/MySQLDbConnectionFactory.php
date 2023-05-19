@@ -83,6 +83,15 @@ class MySQLDbConnectionFactory
                     $pdo->exec('SET NAMES utf8;');
                 }
 
+                // Set wait_timeout
+                try {
+                    $logger->warning('Current wait_timeout ' . $pdo->query('SELECT @@wait_timeout')->fetchColumn());
+                    $pdo->exec('SET SESSION wait_timeout = 300;');
+                    $logger->warning('New wait_timeout ' . $pdo->query('SELECT @@wait_timeout')->fetchColumn());
+                } catch (PDOException $exception) {
+                    $logger->error('Error setting wait_timeout.');
+                }
+
                 // Set isolation level
                 if ($dbConfig->hasTransactionIsolationLevel()) {
                     $pdo->query(
