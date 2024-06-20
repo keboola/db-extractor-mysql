@@ -32,17 +32,20 @@ services:
 
   mysql:
     image: mysql:${MYSQL_VERSION}
-    command: mysqld --local-infile --port=3306 --mysql-native-password=ON
+    entrypoint: /usr/local/bin/entrypoint.sh
+    volumes:
+      - ./docker/mysql-entrypoint.sh:/usr/local/bin/entrypoint.sh
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
 
   mysql-ssl:
     image: mysql:${MYSQL_VERSION}
-    command: mysqld --local-infile --port=3306 --mysql-native-password=ON
+    entrypoint: /usr/local/bin/entrypoint.sh
     volumes:
       - ./docker/ssl/certificates:/ssl-cert
       - ./docker/mysql-ssl/${MYSQL_VERSION}/conf.d:/etc/mysql/conf.d
+      - ./docker/mysql-entrypoint.sh:/usr/local/bin/entrypoint.sh
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
