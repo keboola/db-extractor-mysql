@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
+use Keboola\Component\Config\DatatypeSupport;
 use Keboola\Component\Logger;
 use Keboola\DbExtractor\Extractor\MySQL;
 use Keboola\DbExtractor\FunctionalTests\PdoTestConnection;
@@ -45,7 +46,13 @@ class QueryGenerationTest extends TestCase
             $config['parameters']['query'] : null;
 
         $exportConfig = ExportConfig::fromArray($config['parameters']);
-        $extractor = new MySQL($config['parameters'], $state, new Logger(), $config['action'] ?? 'run');
+        $extractor = new MySQL(
+            $config['parameters'],
+            $state,
+            new Logger(),
+            $config['action'] ?? 'run',
+            DatatypeSupport::NONE,
+        );
         if ($exportConfig->isIncrementalFetching()) {
             $extractor->validateIncrementalFetching($exportConfig);
         }

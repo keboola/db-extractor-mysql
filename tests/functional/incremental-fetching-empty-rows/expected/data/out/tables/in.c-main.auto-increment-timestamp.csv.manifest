@@ -1,9 +1,6 @@
 {
     "destination": "in.c-main.auto-increment-timestamp",
     "incremental": true,
-    "primary_key": [
-        "Weir_d_I_D"
-    ],
     "metadata": [
         {
             "key": "KBC.name",
@@ -26,12 +23,19 @@
             "value": 0
         }
     ],
+    "columns": [
+        "Weir_d_I_D",
+        "Weir_d_Na_me",
+        "someInteger",
+        "someDecimal",
+        "type",
+        "datetime"
+    ],
+    "primary_key": [
+        "Weir_d_I_D"
+    ],
     "column_metadata": {
         "Weir_d_I_D": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "int"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -51,10 +55,6 @@
             {
                 "key": "KBC.sanitizedName",
                 "value": "Weir_d_I_D"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": true
             },
             {
                 "key": "KBC.uniqueKey",
@@ -78,10 +78,6 @@
             }
         ],
         "Weir_d_Na_me": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "varchar"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -107,10 +103,6 @@
                 "value": "Weir_d_Na_me"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": true
             },
@@ -124,10 +116,6 @@
             }
         ],
         "someInteger": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "int"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -153,10 +141,6 @@
                 "value": "someInteger"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -166,10 +150,6 @@
             }
         ],
         "someDecimal": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "decimal"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -195,10 +175,6 @@
                 "value": "someDecimal"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -208,10 +184,6 @@
             }
         ],
         "type": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "varchar"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -237,10 +209,6 @@
                 "value": "type"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -250,10 +218,6 @@
             }
         ],
         "datetime": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "datetime"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": false
@@ -271,10 +235,6 @@
                 "value": "datetime"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -283,13 +243,5 @@
                 "value": 6
             }
         ]
-    },
-    "columns": [
-        "Weir_d_I_D",
-        "Weir_d_Na_me",
-        "someInteger",
-        "someDecimal",
-        "type",
-        "datetime"
-    ]
+    }
 }

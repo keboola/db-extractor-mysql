@@ -23,12 +23,14 @@
             "value": 100
         }
     ],
+    "columns": [
+        "usergender",
+        "usercity",
+        "usersentiment",
+        "zipcode"
+    ],
     "column_metadata": {
         "usergender": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "text"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -52,10 +54,6 @@
             {
                 "key": "KBC.sanitizedName",
                 "value": "usergender"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -68,10 +66,6 @@
         ],
         "usercity": [
             {
-                "key": "KBC.datatype.type",
-                "value": "text"
-            },
-            {
                 "key": "KBC.datatype.nullable",
                 "value": true
             },
@@ -94,10 +88,6 @@
             {
                 "key": "KBC.sanitizedName",
                 "value": "usercity"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -110,10 +100,6 @@
         ],
         "usersentiment": [
             {
-                "key": "KBC.datatype.type",
-                "value": "text"
-            },
-            {
                 "key": "KBC.datatype.nullable",
                 "value": true
             },
@@ -136,10 +122,6 @@
             {
                 "key": "KBC.sanitizedName",
                 "value": "usersentiment"
-            },
-            {
-                "key": "KBC.primaryKey",
-                "value": false
             },
             {
                 "key": "KBC.uniqueKey",
@@ -152,10 +134,6 @@
         ],
         "zipcode": [
             {
-                "key": "KBC.datatype.type",
-                "value": "text"
-            },
-            {
                 "key": "KBC.datatype.nullable",
                 "value": true
             },
@@ -180,10 +158,6 @@
                 "value": "zipcode"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -192,11 +166,5 @@
                 "value": 4
             }
         ]
-    },
-    "columns": [
-        "usergender",
-        "usercity",
-        "usersentiment",
-        "zipcode"
-    ]
+    }
 }

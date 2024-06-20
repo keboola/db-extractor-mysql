@@ -23,12 +23,12 @@
             "value": 2
         }
     ],
+    "columns": [
+        "id",
+        "name"
+    ],
     "column_metadata": {
         "id": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "int"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -54,10 +54,6 @@
                 "value": "id"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -67,10 +63,6 @@
             }
         ],
         "name": [
-            {
-                "key": "KBC.datatype.type",
-                "value": "varchar"
-            },
             {
                 "key": "KBC.datatype.nullable",
                 "value": true
@@ -96,10 +88,6 @@
                 "value": "name"
             },
             {
-                "key": "KBC.primaryKey",
-                "value": false
-            },
-            {
                 "key": "KBC.uniqueKey",
                 "value": false
             },
@@ -108,9 +96,5 @@
                 "value": 2
             }
         ]
-    },
-    "columns": [
-        "id",
-        "name"
-    ]
+    }
 }
