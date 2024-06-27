@@ -72,6 +72,7 @@ JSON;
 {
   "parameters": {
     "data_dir": "MYSQL",
+    "extractor_class": "MySQL",
     "db": %s,
     "query": "SELECT * FROM escaping",
     "outputTable": "in.c-main.escaping",
