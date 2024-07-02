@@ -16,4 +16,9 @@ return function (DatadirTest $test): void {
     // special table
     $manager->createEscapingTable();
     $manager->generateEscapingRows();
+
+    // Auto increment table
+    $manager->createAITable();
+    $manager->generateAIRows();
+    $manager->addAIConstraint();
 };

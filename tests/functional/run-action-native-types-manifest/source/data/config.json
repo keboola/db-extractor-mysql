@@ -21,6 +21,18 @@
           "schema": "test",
           "tableName": "sales"
         }
+      },
+      {
+        "id": 3,
+        "enabled": true,
+        "name": "types",
+        "outputTable": "in.c-main.types",
+        "incremental": false,
+        "primaryKey": ["_Weir%d I-D"],
+        "table": {
+          "schema": "test",
+          "tableName": "auto Increment Timestamp"
+        }
       }
     ],
     "db": {
