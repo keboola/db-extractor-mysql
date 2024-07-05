@@ -38,7 +38,7 @@ class MySQLMetadataProvider implements MetadataProvider
 
     /**
      * @param array|InputTable[] $whitelist
-     * @param bool $loadColumns if false, columns metadata are NOT loaded, useful useful if there are a lot of tables
+     * @param bool $loadColumns if false, columns metadata are NOT loaded, useful if there are a lot of tables
      */
     public function listTables(array $whitelist = [], bool $loadColumns = true): TableCollection
     {

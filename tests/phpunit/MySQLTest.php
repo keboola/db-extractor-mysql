@@ -123,220 +123,172 @@ class MySQLTest extends TestCase
             'KBC.rowCount' => 1,
         ];
         $expectedColumnMetadata = [
-            'some_primary_key' =>
+            'some_primary_key' => [
                 [
-                    [
-                        'key' => 'KBC.datatype.type',
-                        'value' => 'int',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.nullable',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.datatype.basetype',
-                        'value' => 'INTEGER',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.length',
-                        'value' => '10',
-                    ],
-                    [
-                        'key' => 'KBC.sourceName',
-                        'value' => 'some_primary_key',
-                    ],
-                    [
-                        'key' => 'KBC.sanitizedName',
-                        'value' => 'some_primary_key',
-                    ],
-                    [
-                        'key' => 'KBC.primaryKey',
-                        'value' => true,
-                    ],
-                    [
-                        'key' => 'KBC.uniqueKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.ordinalPosition',
-                        'value' => 1,
-                    ],
-                    [
-                        'key' => 'KBC.autoIncrement',
-                        'value' => true,
-                    ],
-                    [
-                        'key' => 'KBC.autoIncrementValue',
-                        'value' => 2,
-                    ],
-                    [
-                        'key' => 'KBC.description',
-                        'value' => 'This is a weird ID',
-                    ],
-                    [
-                        'key' => 'KBC.constraintName',
-                        'value' => 'PRIMARY',
-                    ],
+                    'key' => 'KBC.datatype.nullable',
+                    'value' => false,
                 ],
-            'random_name' =>
                 [
-                    [
-                        'key' => 'KBC.datatype.type',
-                        'value' => 'varchar',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.nullable',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.datatype.basetype',
-                        'value' => 'STRING',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.length',
-                        'value' => '30',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.default',
-                        'value' => 'pam',
-                    ],
-                    [
-                        'key' => 'KBC.sourceName',
-                        'value' => 'random_name',
-                    ],
-                    [
-                        'key' => 'KBC.sanitizedName',
-                        'value' => 'random_name',
-                    ],
-                    [
-                        'key' => 'KBC.primaryKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.uniqueKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.ordinalPosition',
-                        'value' => '2',
-                    ],
-                    [
-                        'key' => 'KBC.description',
-                        'value' => 'This is a weird name',
-                    ],
+                    'key' => 'KBC.datatype.basetype',
+                    'value' => 'INTEGER',
                 ],
-            'datetime' =>
                 [
-                    [
-                        'key' => 'KBC.datatype.type',
-                        'value' => 'datetime',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.nullable',
-                        'value' => true,
-                    ],
-                    [
-                        'key' => 'KBC.datatype.basetype',
-                        'value' => 'TIMESTAMP',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.default',
-                        'value' => 'CURRENT_TIMESTAMP',
-                    ],
-                    [
-                        'key' => 'KBC.sourceName',
-                        'value' => 'datetime',
-                    ],
-                    [
-                        'key' => 'KBC.sanitizedName',
-                        'value' => 'datetime',
-                    ],
-                    [
-                        'key' => 'KBC.primaryKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.uniqueKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.ordinalPosition',
-                        'value' => '3',
-                    ],
+                    'key' => 'KBC.datatype.length',
+                    'value' => '10',
                 ],
-            'foreign_key' =>
                 [
-                    [
-                        'key' => 'KBC.datatype.type',
-                        'value' => 'int',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.nullable',
-                        'value' => true,
-                    ],
-                    [
-                        'key' => 'KBC.datatype.basetype',
-                        'value' => 'INTEGER',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.length',
-                        'value' => '10',
-                    ],
-                    [
-                        'key' => 'KBC.datatype.default',
-                        'value' => '',
-                    ],
-                    [
-                        'key' => 'KBC.sourceName',
-                        'value' => 'foreign_key',
-                    ],
-                    [
-                        'key' => 'KBC.sanitizedName',
-                        'value' => 'foreign_key',
-                    ],
-                    [
-                        'key' => 'KBC.primaryKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.uniqueKey',
-                        'value' => false,
-                    ],
-                    [
-                        'key' => 'KBC.ordinalPosition',
-                        'value' => '4',
-                    ],
-                    [
-                        'key' => 'KBC.description',
-                        'value' => 'This is a foreign key',
-                    ],
-                    [
-                        'key' => 'KBC.foreignKey',
-                        'value' => true,
-                    ],
-                    [
-                        'key' => 'KBC.foreignKeyName',
-                        'value' => 'foreign_keyFK',
-                    ],
-                    [
-                        'key' => 'KBC.foreignKeyRefSchema',
-                        'value' => 'test',
-                    ],
-                    [
-                        'key' => 'KBC.foreignKeyRefTable',
-                        'value' => 'auto Increment Timestamp',
-
-                    ],
-                    [
-                        'key' => 'KBC.foreignKeyRefColumn',
-                        'value' => '_Weir%d I-D',
-                    ],
-                    [
-                        'key' => 'KBC.constraintName',
-                        'value' => 'foreign_keyFK',
-                    ],
+                    'key' => 'KBC.sourceName',
+                    'value' => 'some_primary_key',
                 ],
+                [
+                    'key' => 'KBC.sanitizedName',
+                    'value' => 'some_primary_key',
+                ],
+                [
+                    'key' => 'KBC.uniqueKey',
+                    'value' => false,
+                ],
+                [
+                    'key' => 'KBC.ordinalPosition',
+                    'value' => 1,
+                ],
+                [
+                    'key' => 'KBC.autoIncrement',
+                    'value' => true,
+                ],
+                [
+                    'key' => 'KBC.autoIncrementValue',
+                    'value' => 2,
+                ],
+                [
+                    'key' => 'KBC.constraintName',
+                    'value' => 'PRIMARY',
+                ],
+            ],
+            'random_name' => [
+                [
+                    'key' => 'KBC.datatype.nullable',
+                    'value' => false,
+                ],
+                [
+                    'key' => 'KBC.datatype.basetype',
+                    'value' => 'STRING',
+                ],
+                [
+                    'key' => 'KBC.datatype.length',
+                    'value' => '30',
+                ],
+                [
+                    'key' => 'KBC.datatype.default',
+                    'value' => 'pam',
+                ],
+                [
+                    'key' => 'KBC.sourceName',
+                    'value' => 'random_name',
+                ],
+                [
+                    'key' => 'KBC.sanitizedName',
+                    'value' => 'random_name',
+                ],
+                [
+                    'key' => 'KBC.uniqueKey',
+                    'value' => false,
+                ],
+                [
+                    'key' => 'KBC.ordinalPosition',
+                    'value' => 2,
+                ],
+            ],
+            'datetime' => [
+                [
+                    'key' => 'KBC.datatype.nullable',
+                    'value' => true,
+                ],
+                [
+                    'key' => 'KBC.datatype.basetype',
+                    'value' => 'TIMESTAMP',
+                ],
+                [
+                    'key' => 'KBC.datatype.default',
+                    'value' => 'CURRENT_TIMESTAMP',
+                ],
+                [
+                    'key' => 'KBC.sourceName',
+                    'value' => 'datetime',
+                ],
+                [
+                    'key' => 'KBC.sanitizedName',
+                    'value' => 'datetime',
+                ],
+                [
+                    'key' => 'KBC.uniqueKey',
+                    'value' => false,
+                ],
+                [
+                    'key' => 'KBC.ordinalPosition',
+                    'value' => 3,
+                ],
+            ],
+            'foreign_key' => [
+                [
+                    'key' => 'KBC.datatype.nullable',
+                    'value' => true,
+                ],
+                [
+                    'key' => 'KBC.datatype.basetype',
+                    'value' => 'INTEGER',
+                ],
+                [
+                    'key' => 'KBC.datatype.length',
+                    'value' => '10',
+                ],
+                [
+                    'key' => 'KBC.datatype.default',
+                    'value' => '',
+                ],
+                [
+                    'key' => 'KBC.sourceName',
+                    'value' => 'foreign_key',
+                ],
+                [
+                    'key' => 'KBC.sanitizedName',
+                    'value' => 'foreign_key',
+                ],
+                [
+                    'key' => 'KBC.uniqueKey',
+                    'value' => false,
+                ],
+                [
+                    'key' => 'KBC.ordinalPosition',
+                    'value' => 4,
+                ],
+                [
+                    'key' => 'KBC.foreignKey',
+                    'value' => true,
+                ],
+                [
+                    'key' => 'KBC.foreignKeyName',
+                    'value' => 'foreign_keyFK',
+                ],
+                [
+                    'key' => 'KBC.foreignKeyRefSchema',
+                    'value' => 'test',
+                ],
+                [
+                    'key' => 'KBC.foreignKeyRefTable',
+                    'value' => 'auto Increment Timestamp',
+                ],
+                [
+                    'key' => 'KBC.foreignKeyRefColumn',
+                    'value' => '_Weir%d I-D',
+                ],
+                [
+                    'key' => 'KBC.constraintName',
+                    'value' => 'foreign_keyFK',
+                ],
+            ],
         ];
+
         foreach ($manifests as $manifest) {
             /** @var array<array> $outputManifest */
             $outputManifest = json_decode(
