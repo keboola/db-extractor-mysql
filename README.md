@@ -64,3 +64,5 @@ The extraction has the following configuration options:
 ## License
 
 MIT licensed, see [LICENSE](./LICENSE) file.
+
+dummy
