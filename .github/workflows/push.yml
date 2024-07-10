@@ -75,7 +75,6 @@ jobs:
       - name: Run tests
         run: |
           export MYSQL_VERSION="${{ matrix.mysql }}"
-          docker-compose run wait
           docker-compose run app
 
   tests-in-kbc:
