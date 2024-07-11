@@ -21,6 +21,11 @@ services:
       - mysql-ssl
       - mysql-ssl:mysql-different-cn
       - sshproxy
+    depends_on:
+      mysql:
+        condition: service_healthy
+      mysql-ssl:
+        condition: service_healthy
 
   dev:
     <<: *app
@@ -38,6 +43,11 @@ services:
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mysql-ssl:
     image: mysql:${MYSQL_VERSION}
@@ -49,6 +59,11 @@ services:
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   sshproxy:
     image: keboola/db-component-ssh-proxy:latest
@@ -56,15 +71,6 @@ services:
       - ssh-keys:/root/.ssh
     links:
       - mysql
-
-  wait:
-    image: waisbrot/wait
-    depends_on:
-      - mysql
-      - mysql-ssl
-    environment:
-      - TARGETS=mysql:3306,mysql-ssl:3306
-      - TIMEOUT=200
 
 volumes:
   ssh-keys:
