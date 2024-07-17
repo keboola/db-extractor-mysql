@@ -38,10 +38,6 @@
                 "value": "INTEGER"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "10"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
@@ -70,10 +66,6 @@
             {
                 "key": "KBC.datatype.basetype",
                 "value": "STRING"
-            },
-            {
-                "key": "KBC.datatype.length",
-                "value": "255"
             },
             {
                 "key": "KBC.datatype.default",

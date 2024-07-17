@@ -24,7 +24,6 @@
             "name": "Weir_d_I_D",
             "data_type": {
                 "base": {
-                    "length": "10",
                     "type": "INTEGER"
                 }
             }
@@ -43,7 +42,6 @@
             "data_type": {
                 "base": {
                     "default": "mario",
-                    "length": "55",
                     "type": "STRING"
                 }
             }
@@ -61,7 +59,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "10",
                     "type": "INTEGER"
                 }
             }
@@ -79,7 +76,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "10,2",
                     "type": "NUMERIC"
                 }
             }
@@ -97,7 +93,6 @@
             "data_type": {
                 "base": {
                     "default": "",
-                    "length": "55",
                     "type": "STRING"
                 }
             }

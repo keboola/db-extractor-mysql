@@ -133,10 +133,6 @@ class MySQLTest extends TestCase
                     'value' => 'INTEGER',
                 ],
                 [
-                    'key' => 'KBC.datatype.length',
-                    'value' => '10',
-                ],
-                [
                     'key' => 'KBC.sourceName',
                     'value' => 'some_primary_key',
                 ],
@@ -173,10 +169,6 @@ class MySQLTest extends TestCase
                 [
                     'key' => 'KBC.datatype.basetype',
                     'value' => 'STRING',
-                ],
-                [
-                    'key' => 'KBC.datatype.length',
-                    'value' => '30',
                 ],
                 [
                     'key' => 'KBC.datatype.default',
@@ -237,10 +229,6 @@ class MySQLTest extends TestCase
                 [
                     'key' => 'KBC.datatype.basetype',
                     'value' => 'INTEGER',
-                ],
-                [
-                    'key' => 'KBC.datatype.length',
-                    'value' => '10',
                 ],
                 [
                     'key' => 'KBC.datatype.default',
