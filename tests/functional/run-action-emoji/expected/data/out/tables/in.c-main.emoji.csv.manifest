@@ -1,4 +1,31 @@
 {
     "destination": "in.c-main.emoji",
-    "incremental": false
+    "incremental": false,
+    "columns": [
+        "emoji"
+    ],
+    "column_metadata": {
+        "emoji": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "emoji"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "emoji"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            }
+        ]
+    }
 }

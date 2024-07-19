@@ -3,6 +3,9 @@ Creating PDO connection to "mysql:host=mysql;port=3306;charset=utf8;dbname=test"
 Exporting "sales" to "in.c-main.escaping".
 [%s] DEBUG: Running query "SELECT * FROM escaping". [] []
 [%s] DEBUG: Running query "SELECT 1". [] []
+[%s] DEBUG: Running query "CREATE TEMPORARY TABLE temp_table AS SELECT * FROM escaping LIMIT 0;". [] []
+[%s] DEBUG: Running query "SHOW COLUMNS FROM temp_table". [] []
+[%s] DEBUG: Running query "DROP TEMPORARY TABLE temp_table". [] []
 Exported "7" rows to "in.c-main.escaping".
 Exporting "sales" to "in.c-main.sales".
 [%s] DEBUG: Running query "SELECT * FROM `test`.`sales`". [] []
