@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Extractor;
 
+use Keboola\DbExtractor\Adapter\MySQLQueryMetadata;
 use Keboola\DbExtractor\Adapter\PDO\PdoConnection;
+use Keboola\DbExtractor\Adapter\PDO\PdoQueryResult;
+use Keboola\DbExtractor\Adapter\ValueObject\QueryResult;
 use Keboola\DbExtractor\Exception\UserException;
 use PDOException;
+use PDOStatement;
 use Retry\BackOff\ExponentialBackOffPolicy;
 use Retry\Policy\SimpleRetryPolicy;
 use Retry\RetryProxy;
@@ -53,5 +57,14 @@ class MySQLDbConnection extends PdoConnection
         $retryPolicy = new SimpleRetryPolicy($maxRetries, $this->getExpectedExceptionClasses());
         $backoffPolicy = new ExponentialBackOffPolicy(2000, null, self::RETRY_MAX_INTERVAL);
         return new RetryProxy($retryPolicy, $backoffPolicy, $this->logger);
+    }
+
+    protected function doQuery(string $query): QueryResult
+    {
+        /** @var PDOStatement $stmt */
+        $stmt = $this->pdo->prepare($query);
+        $stmt->execute();
+        $queryMetadata = new MySQLQueryMetadata($this, $query);
+        return new PdoQueryResult($query, $queryMetadata, $stmt);
     }
 }

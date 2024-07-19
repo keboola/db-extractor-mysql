@@ -1,3 +1,4 @@
 parameters:
     ignoreErrors:
         - identifier: missingType.iterableValue
+        - '#^Parameter \#5 \$incFetchingColMaxValue of class Keboola\\DbExtractor\\Adapter\\ValueObject\\ExportResult constructor expects string\|null, mixed given.$#'
