@@ -133,7 +133,7 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "STRING"
+                "value": "string"
             },
             {
                 "key": "KBC.sourceName",

@@ -15,7 +15,7 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "INTEGER"
+                "value": "string"
             },
             {
                 "key": "KBC.sourceName",
@@ -37,7 +37,7 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "STRING"
+                "value": "string"
             },
             {
                 "key": "KBC.sourceName",
@@ -59,7 +59,7 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "STRING"
+                "value": "string"
             },
             {
                 "key": "KBC.sourceName",
@@ -81,7 +81,7 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "STRING"
+                "value": "string"
             },
             {
                 "key": "KBC.sourceName",
