@@ -10,16 +10,12 @@ use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\Metadata\MetadataProvider;
 use Keboola\DbExtractor\Adapter\PDO\PdoExportAdapter;
 use Keboola\DbExtractor\Adapter\Query\DefaultQueryFactory;
-use Keboola\DbExtractor\Adapter\ResultWriter\DefaultResultWriter;
 use Keboola\DbExtractor\Configuration\ValueObject\MysqlDatabaseConfig;
 use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\TableResultFormat\Exception\ColumnNotFoundException;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
-use Keboola\Temp\Temp;
-use PDO;
-use PDOException;
 
 class MySQL extends BaseExtractor
 {
@@ -36,7 +32,7 @@ class MySQL extends BaseExtractor
 
     protected function createExportAdapter(): ExportAdapter
     {
-        $resultWriter = new DefaultResultWriter($this->state);
+        $resultWriter = new MySQLResultWriter($this->state);
         $simpleQueryFactory = new DefaultQueryFactory($this->state);
         return new PdoExportAdapter(
             $this->logger,

@@ -40,10 +40,6 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "65535"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
@@ -72,10 +68,6 @@
             {
                 "key": "KBC.datatype.basetype",
                 "value": "STRING"
-            },
-            {
-                "key": "KBC.datatype.length",
-                "value": "65535"
             },
             {
                 "key": "KBC.datatype.default",
@@ -108,10 +100,6 @@
                 "value": "STRING"
             },
             {
-                "key": "KBC.datatype.length",
-                "value": "65535"
-            },
-            {
                 "key": "KBC.datatype.default",
                 "value": ""
             },
@@ -140,10 +128,6 @@
             {
                 "key": "KBC.datatype.basetype",
                 "value": "STRING"
-            },
-            {
-                "key": "KBC.datatype.length",
-                "value": "65535"
             },
             {
                 "key": "KBC.datatype.default",

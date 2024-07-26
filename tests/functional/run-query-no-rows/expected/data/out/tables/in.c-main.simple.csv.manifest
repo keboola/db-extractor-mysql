@@ -1,4 +1,100 @@
 {
     "destination": "in.c-main.simple",
-    "incremental": false
+    "incremental": false,
+    "columns": [
+        "id",
+        "user_name",
+        "custom",
+        "concat"
+    ],
+    "column_metadata": {
+        "id": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "string"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "id"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "id"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            }
+        ],
+        "user_name": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "string"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "user_name"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "user_name"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            }
+        ],
+        "custom": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "string"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "custom"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "custom"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            }
+        ],
+        "concat": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "string"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "concat"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "concat"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            }
+        ]
+    }
 }
