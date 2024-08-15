@@ -5,13 +5,13 @@
 
 - Clone the repository.
 - Create `.env` file with `MYSQL_VERSION=latest`.
-- Run `docker-compose build`.
+- Run `docker compose build`.
 
 #### Tools
 
-- codesniffer: `docker-compose run --rm dev composer phpcs` 
-- static analysis: `docker-compose run --rm dev composer phpstan`
-- unit tests: `docker-compose run --rm dev composer tests`
+- codesniffer: `docker compose run --rm dev composer phpcs` 
+- static analysis: `docker compose run --rm dev composer phpstan`
+- unit tests: `docker compose run --rm dev composer tests`
 
 #### Configuration Options
 
