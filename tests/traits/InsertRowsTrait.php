@@ -37,6 +37,9 @@ trait InsertRowsTrait
                         if ($value === 'GETDATE()') {
                             return $value;
                         }
+                        if (is_string($value) === true && str_starts_with($value, '0x') === true) {
+                            return $value;
+                        }
                         return $this->quote((string) $value);
                     }, $row),
                 ) .
@@ -52,7 +55,7 @@ trait InsertRowsTrait
                     $values,
                 ));
             } catch (Throwable $e) {
-                throw new UserException($e->getMessage(), $e->getCode(), $e);
+                throw new UserException($e->getMessage(), (int) $e->getCode(), $e);
             }
         }
     }

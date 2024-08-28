@@ -63,4 +63,35 @@ trait EscapingTableTrait
             'col2' => 'text CHARACTER SET utf8mb4 NULL',
         ];
     }
+
+    public function createBinaryConversionsTable(string $name = 'binary_conversions'): void
+    {
+        $this->createTable($name, $this->getBinaryColumns());
+    }
+
+    public function generateBinaryConversionsRows(string $tableName = 'binary_conversions'): void
+    {
+        $data = $this->getBinaryRows();
+        $this->insertRows($tableName, $data['columns'], $data['data']);
+    }
+
+    private function getBinaryRows(): array
+    {
+        return [
+            'columns' => ['bin1', 'bin2'],
+            'data' => [
+                ['0x3F1256', '0xFBD300'],
+                ['0xAA4234', '0xF12C40'],
+                ['0xFFA500', '0xF0A3DD'],
+            ],
+        ];
+    }
+
+    private function getBinaryColumns(): array
+    {
+        return [
+            'bin1' => 'BINARY(3) NULL',
+            'bin2' => 'BINARY(3) NULL',
+        ];
+    }
 }

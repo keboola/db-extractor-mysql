@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor;
 
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlDbNode;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlTableNodesDecorator;
+use Keboola\DbExtractor\Configuration\ValueObject\MySQLExportConfig;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ActionConfigRowDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
@@ -37,5 +38,10 @@ class MySQLApplication extends Application
                 new ConfigDefinition($dbNode, null, null, new MysqlTableNodesDecorator()),
             );
         }
+    }
+
+    protected function createExportConfig(array $data): MySQLExportConfig
+    {
+        return MySQLExportConfig::fromArray($data);
     }
 }

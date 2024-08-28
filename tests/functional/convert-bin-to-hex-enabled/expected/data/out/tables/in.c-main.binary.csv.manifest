@@ -1,0 +1,92 @@
+{
+    "destination": "in.c-main.binary",
+    "incremental": false,
+    "metadata": [
+        {
+            "key": "KBC.name",
+            "value": "binary_conversions"
+        },
+        {
+            "key": "KBC.sanitizedName",
+            "value": "binary_conversions"
+        },
+        {
+            "key": "KBC.schema",
+            "value": "test"
+        },
+        {
+            "key": "KBC.type",
+            "value": "BASE TABLE"
+        },
+        {
+            "key": "KBC.rowCount",
+            "value": 3
+        }
+    ],
+    "columns": [
+        "bin1",
+        "bin2"
+    ],
+    "column_metadata": {
+        "bin1": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "bin1"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "bin1"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 1
+            }
+        ],
+        "bin2": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "bin2"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "bin2"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 2
+            }
+        ]
+    }
+}

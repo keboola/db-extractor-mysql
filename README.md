@@ -48,7 +48,7 @@ The extraction has the following configuration options:
 
 - id: numeric (required),
 - name: string (required),
-- query: stirng (optional, but required if table not present)
+- query: string (optional, but required if table not present)
 - table: array (optional, but required if table not present)
   - tableName: string
   - schema: string
@@ -60,6 +60,7 @@ The extraction has the following configuration options:
 - incrementalFetchingLimit: integer (optional)
 - enabled: boolean (optional)
 - retries: integer (optional) number of times to retry failures
+- convertBin2hex: boolean (optional) convert binary fields to hex (table option must be configured)
 
 ## License
 
