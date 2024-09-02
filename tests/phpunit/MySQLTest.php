@@ -433,6 +433,7 @@ class MySQLTest extends TestCase
 
         $config = $this->getRowConfig();
         unset($config['parameters']['incremental']);
+        unset($config['parameters']['primaryKey']);
         $config['parameters']['query'] = 'SELECT * FROM sales WHERE 1 = 2;'; // no results
 
         JsonHelper::writeFile($this->dataDir . '/config.json', $config);
