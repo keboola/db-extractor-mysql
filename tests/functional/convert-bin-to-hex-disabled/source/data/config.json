@@ -1,0 +1,47 @@
+{
+  "parameters": {
+    "tables": [
+      {
+        "id": 1,
+        "name": "sales",
+        "query": "SELECT * FROM escaping",
+        "outputTable": "in.c-main.escaping",
+        "incremental": false,
+        "primaryKey": ["col1"],
+        "enabled": true
+      },
+      {
+        "id": 2,
+        "enabled": true,
+        "name": "sales",
+        "outputTable": "in.c-main.sales",
+        "incremental": false,
+        "primaryKey": null,
+        "table": {
+          "schema": "test",
+          "tableName": "sales"
+        }
+      },
+      {
+        "id": 3,
+        "enabled": true,
+        "name": "sales",
+        "outputTable": "in.c-main.binary",
+        "incremental": false,
+        "primaryKey": null,
+        "table": {
+          "schema": "test",
+          "tableName": "binary_conversions"
+        },
+        "convertBin2hex": false
+      }
+    ],
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+}

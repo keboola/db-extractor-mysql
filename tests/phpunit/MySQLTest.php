@@ -603,12 +603,14 @@ class MySQLTest extends TestCase
             $app->execute();
             Assert::fail('Exception expected.');
         } catch (UserExceptionInterface $e) {
+            var_dump($e->getMessage());
             Assert::assertThat($e->getMessage(), Assert::logicalOr(
                 // Message differs between MySQL versions
                 Assert::stringContains(
                     "Base table or view not found: 1146 Table 'TesT.Auto_INCREMENT_TimestamP' doesn't exist",
                 ),
                 Assert::stringContains("Unknown database 'TesT'"),
+                Assert::stringContains('Table with name "Auto_INCREMENT_TimestamP" and schema "TesT" not found.'),
             ));
         }
     }

@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor\Extractor;
 
 use Keboola\DbExtractor\Adapter\PDO\PdoConnection;
 use Keboola\DbExtractor\Adapter\PDO\PdoQueryResult;
+use Keboola\DbExtractor\Adapter\ValueObject\QueryMetadata;
 use Keboola\DbExtractor\Adapter\ValueObject\QueryResult;
 use Keboola\DbExtractor\Exception\UserException;
 use PDOException;
@@ -65,6 +66,7 @@ class MySQLDbConnection extends PdoConnection
         $stmt->execute();
         $queryMetadata = $this->getQueryMetadata($query, $stmt);
         $queryMetadata->getColumns();
-        return new PdoQueryResult($query, $queryMetadata, $stmt);
+        $result = new PdoQueryResult($query, $queryMetadata, $stmt);
+        return $result;
     }
 }

@@ -8,7 +8,6 @@ use Keboola\Datatype\Definition\Exception\InvalidLengthException;
 use Keboola\Datatype\Definition\MySQL as MysqlDatatype;
 use Keboola\DbExtractor\Adapter\ExportAdapter;
 use Keboola\DbExtractor\Adapter\Metadata\MetadataProvider;
-use Keboola\DbExtractor\Adapter\PDO\PdoExportAdapter;
 use Keboola\DbExtractor\Adapter\Query\DefaultQueryFactory;
 use Keboola\DbExtractor\Configuration\ValueObject\MysqlDatabaseConfig;
 use Keboola\DbExtractor\Exception\ApplicationException;
@@ -34,7 +33,7 @@ class MySQL extends BaseExtractor
     {
         $resultWriter = new MySQLResultWriter($this->state);
         $simpleQueryFactory = new DefaultQueryFactory($this->state);
-        return new PdoExportAdapter(
+        return new MySQLPdoExportAdapter(
             $this->logger,
             $this->connection,
             $simpleQueryFactory,
@@ -110,7 +109,30 @@ class MySQL extends BaseExtractor
             ));
         }
 
-        return parent::export($exportConfig);
+        if ($exportConfig->isIncrementalFetching()) {
+            $this->validateIncrementalFetching($exportConfig);
+            $maxValue = $this->canFetchMaxIncrementalValueSeparately($exportConfig) ?
+                $this->getMaxOfIncrementalFetchingColumn($exportConfig) : null;
+        } else {
+            $maxValue = null;
+        }
+
+        $this->logger->info($exportConfig->hasConfigName() ?
+            sprintf('Exporting "%s" to "%s".', $exportConfig->getConfigName(), $exportConfig->getOutputTable()) :
+            sprintf('Exporting to "%s".', $exportConfig->getOutputTable()));
+        $csvFilePath = $this->getOutputFilename($exportConfig->getOutputTable());
+
+        $metadataProvider = $this->getMetadataProvider();
+        if ($exportConfig->hasTable()) {
+            $tableMetadata = $metadataProvider->getTable($exportConfig->getTable());
+        } else {
+            $tableMetadata = null;
+        }
+
+        /** @var MySQLPdoExportAdapter $adapter */
+        $adapter = $this->adapter;
+        $result = $adapter->export($exportConfig, $csvFilePath, $tableMetadata);
+        return $this->processExportResult($exportConfig, $maxValue, $result);
     }
 
     public function validateIncrementalFetching(ExportConfig $exportConfig): void
