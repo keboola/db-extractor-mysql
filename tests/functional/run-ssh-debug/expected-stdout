@@ -1,0 +1,4 @@
+Creating SSH tunnel to 'sshproxy' on local port '1234'
+SSH tunnel opened
+Creating PDO connection to "mysql:%a".
+Exporting to "in.c-main.simple".
