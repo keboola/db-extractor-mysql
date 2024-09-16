@@ -16,7 +16,7 @@
         "ext-pdo": "*",
         "keboola/db-extractor-adapter": "^1.14",
         "keboola/db-extractor-common": "^17.1",
-        "keboola/db-extractor-config": "^1.15",
+        "keboola/db-extractor-config": "^1.16",
         "keboola/db-extractor-table-format": "^3.8",
         "keboola/php-component": "^10.1",
         "keboola/php-datatypes": "^7.2",
