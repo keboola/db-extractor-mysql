@@ -18,6 +18,7 @@
         "keboola/db-extractor-common": "^17.1",
         "keboola/db-extractor-config": "^1.16",
         "keboola/db-extractor-table-format": "^3.8",
+        "keboola/ssh-tunnel": "dev-miro-PST-2098 as 2.1.0",
         "keboola/php-component": "^10.1",
         "keboola/php-datatypes": "^7.2",
         "keboola/php-temp": "^2.0",
