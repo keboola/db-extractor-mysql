@@ -20,6 +20,7 @@ class MysqlDbNode extends DbNode
         parent::init($builder);
         $this->addNetworkCompression($builder);
         $this->addTransactionIsolationLevel($builder);
+        $this->addQueryTimeout($builder);
     }
 
     protected function addDatabaseNode(NodeBuilder $builder): void
@@ -41,5 +42,10 @@ class MysqlDbNode extends DbNode
             self::TRANSACTION_LEVEL_READ_UNCOMMITTED,
             self::TRANSACTION_LEVEL_SERIALIZABLE,
         ])->end();
+    }
+
+    public function addQueryTimeout(NodeBuilder $builder): void
+    {
+        $builder->integerNode('queryTimeout')->end();
     }
 }

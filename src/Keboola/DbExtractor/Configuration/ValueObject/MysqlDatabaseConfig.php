@@ -15,6 +15,8 @@ class MysqlDatabaseConfig extends DatabaseConfig
 
     private bool $networkCompression;
 
+    private ?int $queryTimeout;
+
     public static function fromArray(array $data): self
     {
         $sslEnabled = !empty($data['ssl']) && !empty($data['ssl']['enabled']);
@@ -30,6 +32,7 @@ class MysqlDatabaseConfig extends DatabaseConfig
             $data['transactionIsolationLevel'] ?? null,
             $data['networkCompression'] ?? false,
             $data['initQueries'] ?? [],
+            $data['queryTimeout'] ?? null,
         );
     }
 
@@ -44,9 +47,11 @@ class MysqlDatabaseConfig extends DatabaseConfig
         ?string $transactionIsolationLevel,
         bool $networkCompression,
         array $initQueries,
+        ?int $queryTimeout,
     ) {
         $this->transactionIsolationLevel = $transactionIsolationLevel;
         $this->networkCompression = $networkCompression;
+        $this->queryTimeout = $queryTimeout;
 
         parent::__construct($host, $port, $username, $password, $database, $schema, $sslConnectionConfig, $initQueries);
     }
@@ -67,5 +72,18 @@ class MysqlDatabaseConfig extends DatabaseConfig
             throw new PropertyNotSetException('Property "transactionIsolationLevel" is not set.');
         }
         return $this->transactionIsolationLevel;
+    }
+
+    public function hasQueryTimeout(): bool
+    {
+        return $this->queryTimeout !== null;
+    }
+
+    public function getQueryTimeout(): int
+    {
+        if ($this->queryTimeout === null) {
+            throw new PropertyNotSetException('Property "queryTimeout" is not set.');
+        }
+        return $this->queryTimeout;
     }
 }

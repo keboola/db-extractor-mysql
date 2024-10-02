@@ -31,6 +31,10 @@ class MySQLDbConnectionFactory
             PDO::MYSQL_ATTR_COMPRESS => $dbConfig->isNetworkCompressionEnabled(), // network compression
         ];
 
+        if ($dbConfig->hasQueryTimeout()) {
+            $options[PDO::ATTR_TIMEOUT] = $dbConfig->getQueryTimeout();
+        }
+
         // Ssl encryption
         if ($dbConfig->hasSSLConnection()) {
             $sslConnection = $dbConfig->getSslConnectionConfig();
