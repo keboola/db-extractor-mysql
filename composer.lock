@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6274fe870db4462defec8804439ee414",
+    "content-hash": "4af302a25afff737d63eeb6ce079da15",
     "packages": [
         {
             "name": "doctrine/instantiator",
@@ -171,16 +171,16 @@
         },
         {
             "name": "keboola/db-extractor-adapter",
-            "version": "1.14",
+            "version": "1.15.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/db-extractor-adapter.git",
-                "reference": "7d680f0b75c6f96b7629aa5ff87e4804f143bd6c"
+                "reference": "de0cf9da24739f46d5f7a6ede301cf1dd5a464df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/db-extractor-adapter/zipball/7d680f0b75c6f96b7629aa5ff87e4804f143bd6c",
-                "reference": "7d680f0b75c6f96b7629aa5ff87e4804f143bd6c",
+                "url": "https://api.github.com/repos/keboola/db-extractor-adapter/zipball/de0cf9da24739f46d5f7a6ede301cf1dd5a464df",
+                "reference": "de0cf9da24739f46d5f7a6ede301cf1dd5a464df",
                 "shasum": ""
             },
             "require": {
@@ -190,6 +190,7 @@
                 "keboola/db-extractor-config": "^1.15",
                 "keboola/db-extractor-table-format": "^3.7",
                 "keboola/retry": "^0.5",
+                "keboola/ssh-tunnel": "^2.2",
                 "php": ">=8.2",
                 "psr/log": "^1.1"
             },
@@ -223,9 +224,9 @@
             ],
             "description": "Set of connection adapters for DB extractors.",
             "support": {
-                "source": "https://github.com/keboola/db-extractor-adapter/tree/1.14"
+                "source": "https://github.com/keboola/db-extractor-adapter/tree/1.15.0"
             },
-            "time": "2024-06-05T08:16:23+00:00"
+            "time": "2024-11-19T08:23:44+00:00"
         },
         {
             "name": "keboola/db-extractor-common",
@@ -4460,7 +4461,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {},
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
@@ -4469,6 +4470,6 @@
         "ext-mbstring": "*",
         "ext-pdo": "*"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
