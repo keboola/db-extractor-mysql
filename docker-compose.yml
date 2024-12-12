@@ -40,6 +40,7 @@ services:
     entrypoint: /usr/local/bin/entrypoint.sh
     volumes:
       - ./docker/mysql-entrypoint.sh:/usr/local/bin/entrypoint.sh
+      - ./docker/mysql-ssl/${MYSQL_VERSION}/conf.d:/etc/mysql/conf.d
     environment:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
