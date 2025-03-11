@@ -29,6 +29,7 @@ class MySQLDbConnectionFactory
         $options = [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // convert errors to PDOExceptions
             PDO::MYSQL_ATTR_COMPRESS => $dbConfig->isNetworkCompressionEnabled(), // network compression
+            PDO::ATTR_TIMEOUT => 600,
         ];
 
         if ($dbConfig->hasQueryTimeout()) {
