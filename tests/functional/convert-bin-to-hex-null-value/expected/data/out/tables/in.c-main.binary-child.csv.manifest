@@ -1,0 +1,130 @@
+{
+    "destination": "in.c-main.binary-child",
+    "incremental": false,
+    "metadata": [
+        {
+            "key": "KBC.name",
+            "value": "binary_child"
+        },
+        {
+            "key": "KBC.sanitizedName",
+            "value": "binary_child"
+        },
+        {
+            "key": "KBC.schema",
+            "value": "test"
+        },
+        {
+            "key": "KBC.type",
+            "value": "BASE TABLE"
+        },
+        {
+            "key": "KBC.rowCount",
+            "value": 4
+        }
+    ],
+    "columns": [
+        "id",
+        "parent_bin_id",
+        "name"
+    ],
+    "primary_key": [
+        "id"
+    ],
+    "column_metadata": {
+        "id": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "INTEGER"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "id"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "id"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 1
+            },
+            {
+                "key": "KBC.autoIncrement",
+                "value": true
+            },
+            {
+                "key": "KBC.autoIncrementValue",
+                "value": 5
+            },
+            {
+                "key": "KBC.constraintName",
+                "value": "PRIMARY"
+            }
+        ],
+        "parent_bin_id": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": true
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.datatype.default",
+                "value": ""
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "parent_bin_id"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "parent_bin_id"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 2
+            }
+        ],
+        "name": [
+            {
+                "key": "KBC.datatype.nullable",
+                "value": false
+            },
+            {
+                "key": "KBC.datatype.basetype",
+                "value": "STRING"
+            },
+            {
+                "key": "KBC.sourceName",
+                "value": "name"
+            },
+            {
+                "key": "KBC.sanitizedName",
+                "value": "name"
+            },
+            {
+                "key": "KBC.uniqueKey",
+                "value": false
+            },
+            {
+                "key": "KBC.ordinalPosition",
+                "value": 3
+            }
+        ]
+    }
+}
