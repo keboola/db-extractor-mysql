@@ -1,0 +1,26 @@
+{
+  "parameters": {
+    "tables": [
+      {
+        "id": 1,
+        "enabled": true,
+        "name": "binary-child",
+        "outputTable": "in.c-main.binary-child",
+        "incremental": false,
+        "primaryKey": ["id"],
+        "table": {
+          "schema": "test",
+          "tableName": "binary_child"
+        },
+        "convertBin2hex": true
+      }
+    ],
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+} 

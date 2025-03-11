@@ -99,10 +99,12 @@ class MySQLResultWriter extends DefaultResultWriter
      */
     private function convertBinColumnsToHex(array $resultRow, array $columnsTypes): array
     {
-        ;
         foreach ($resultRow as $key => $value) {
             if (array_key_exists($key, $columnsTypes) === true && $columnsTypes[$key] === 'binary') {
-                $resultRow[$key] = bin2hex($value);
+                // Skip null values, keep them as null
+                if ($value !== null) {
+                    $resultRow[$key] = bin2hex($value);
+                }
             }
         }
         return $resultRow;
