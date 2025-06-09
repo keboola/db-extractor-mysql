@@ -77,17 +77,17 @@ class MySQL extends BaseExtractor
 //        }
 
         // Check network compression
-        if ($databaseConfig->isNetworkCompressionEnabled()) {
-            $status = $this->connection
-                ->query("SHOW SESSION STATUS LIKE 'Compression';")
-                ->fetch();
-
-            if (empty($status['Value']) || $status['Value'] !== 'ON') {
-                throw new UserException('Network communication is not compressed.');
-            } else {
-                $this->logger->info('Using network compression.');
-            }
-        }
+//        if ($databaseConfig->isNetworkCompressionEnabled()) {
+//            $status = $this->connection
+//                ->query("SHOW SESSION STATUS LIKE 'Compression';")
+//                ->fetch();
+//
+//            if (empty($status['Value']) || $status['Value'] !== 'ON') {
+//                throw new UserException('Network communication is not compressed.');
+//            } else {
+//                $this->logger->info('Using network compression.');
+//            }
+//        }
     }
 
     public function testConnection(): void
