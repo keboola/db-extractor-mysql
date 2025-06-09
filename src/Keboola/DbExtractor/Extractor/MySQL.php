@@ -64,17 +64,17 @@ class MySQL extends BaseExtractor
         $this->connection = MySQLDbConnectionFactory::create($databaseConfig, $this->logger, $connectMaxTries);
 
         // Check SSL
-        if ($databaseConfig->hasSSLConnection()) {
-            $status = $this->connection
-                ->query("SHOW STATUS LIKE 'Ssl_cipher';")
-                ->fetch();
-
-            if (empty($status['Value'])) {
-                throw new UserException('Connection is not encrypted');
-            } else {
-                $this->logger->info('Using SSL cipher: ' . $status['Value']);
-            }
-        }
+//        if ($databaseConfig->hasSSLConnection()) {
+//            $status = $this->connection
+//                ->query("SHOW STATUS LIKE 'Ssl_cipher';")
+//                ->fetch();
+//
+//            if (empty($status['Value'])) {
+//                throw new UserException('Connection is not encrypted');
+//            } else {
+//                $this->logger->info('Using SSL cipher: ' . $status['Value']);
+//            }
+//        }
 
         // Check network compression
         if ($databaseConfig->isNetworkCompressionEnabled()) {
