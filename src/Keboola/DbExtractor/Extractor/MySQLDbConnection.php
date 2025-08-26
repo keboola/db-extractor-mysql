@@ -55,7 +55,7 @@ class MySQLDbConnection extends PdoConnection
     protected function createRetryProxy(int $maxRetries): RetryProxy
     {
         $retryPolicy = new SimpleRetryPolicy($maxRetries, $this->getExpectedExceptionClasses());
-        $backoffPolicy = new ExponentialBackOffPolicy(2000, null, self::RETRY_MAX_INTERVAL);
+        $backoffPolicy = new ExponentialBackOffPolicy(5000, null, self::RETRY_MAX_INTERVAL);
         return new RetryProxy($retryPolicy, $backoffPolicy, $this->logger);
     }
 
