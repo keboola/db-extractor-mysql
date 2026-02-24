@@ -39,7 +39,32 @@ The configuration requires a `db` node with the following properties:
   - sshPort string
   - maxRetries integer
 - transactionIsolationLevel: enum (optional) - possible values `REPEATABLE READ`, `READ COMMITTED`, `READ UNCOMMITTED`, `SERIALIZABLE`
-   
+- initQueries: array of strings (optional) - SQL queries to execute on connection initialization
+
+#### Timezone Configuration
+
+By default, the extractor uses the MySQL server's session timezone setting. To ensure consistent UTC timestamps across all environments (especially when using Azure MySQL), you can set the session timezone explicitly using `initQueries`:
+
+```json
+{
+  "db": {
+    "host": "your-host",
+    "port": "3306",
+    "user": "your-user",
+    "#password": "your-password",
+    "database": "your-database",
+    "initQueries": [
+      "SET SESSION time_zone = '+00:00'"
+    ]
+  }
+}
+```
+
+This is particularly important when:
+- Extracting TIMESTAMP columns (which are converted based on session timezone)
+- Working with Azure MySQL instances that may default to non-UTC timezones
+- Ensuring consistent behavior across different cloud providers (AWS, GCP, Azure)
+
 There are 2 possible types of table extraction.  
 1. A table defined by `schema` and `tableName`, this option can also include a columns list.
 2. A `query` which is the SQL SELECT statement to be executed to produce the result table.
