@@ -21,6 +21,53 @@ class MySQLResultWriter extends DefaultResultWriter
         return false;
     }
 
+    protected function createCsvWriter(string $csvFilePath): CsvWriter
+    {
+        $dir = dirname($csvFilePath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0777, true);
+        }
+
+        return new NullAwareCsvWriter($csvFilePath);
+    }
+
+    protected function writeRow(array $row, CsvWriter $csvWriter): void
+    {
+        if ($this->fromEncoding && $this->toEncoding) {
+            $row = $this->convertEncodingPreservingNulls(
+                $row,
+                $this->fromEncoding,
+                $this->toEncoding,
+                $this->ignoreInvalidUtf8,
+            );
+        }
+
+        $csvWriter->writeRow($row);
+    }
+
+    /**
+     * Like convertEncodingInArray, but preserves NULL values instead of casting them to empty string.
+     */
+    private function convertEncodingPreservingNulls(
+        array $row,
+        string $from,
+        string $to,
+        bool $ignoreInvalidUtf8,
+    ): array {
+        return array_map(
+            function ($value) use ($from, $to, $ignoreInvalidUtf8) {
+                if ($value === null) {
+                    return null;
+                }
+                if ($ignoreInvalidUtf8) {
+                    return mb_convert_encoding((string) $value, $from, $to);
+                }
+                return iconv($from, $to, (string) $value);
+            },
+            $row,
+        );
+    }
+
     public function writeToCsv(
         QueryResult $result,
         ExportConfig $exportConfig,
