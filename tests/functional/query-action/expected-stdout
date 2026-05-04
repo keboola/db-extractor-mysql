@@ -1,1 +1,1 @@
-{"status":"success","rows":[{"id":"123","name":"John"}]}
+{"status":"success","rows":[{"id":123,"name":"John"}]}
