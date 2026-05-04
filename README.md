@@ -62,6 +62,14 @@ The extraction has the following configuration options:
 - retries: integer (optional) number of times to retry failures
 - convertBin2hex: boolean (optional) convert binary fields to hex (table option must be configured)
 
+## Sync actions
+
+In addition to the default `run` action, the component exposes the following synchronous actions:
+
+- `testConnection` — verifies the configured credentials.
+- `getTables` — returns a JSON catalog of tables and columns visible to the configured user.
+- `query` — executes an arbitrary SQL statement and returns the result rows as JSON. Intended for agent-driven introspection during configuration; see [docs/agent-query-action.md](./docs/agent-query-action.md).
+
 ## License
 
 MIT licensed, see [LICENSE](./LICENSE) file.

@@ -95,6 +95,17 @@ class MySQL extends BaseExtractor
         $this->connection->testConnection();
     }
 
+    /**
+     * Executes an arbitrary SQL string and returns the result rows as an array
+     * of associative arrays. Used by the `query` sync action.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function runRawQuery(string $sql): array
+    {
+        return $this->connection->query($sql)->fetchAll();
+    }
+
     public function export(ExportConfig $exportConfig): array
     {
         // if database set make sure the database and selected table schema match
