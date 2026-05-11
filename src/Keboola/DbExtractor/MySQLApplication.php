@@ -50,15 +50,15 @@ class MySQLApplication extends Application
 
     protected function getSyncActions(): array
     {
-        return parent::getSyncActions() + ['query' => 'queryAction'];
+        return parent::getSyncActions() + ['probe' => 'probeAction'];
     }
 
-    protected function queryAction(): array
+    protected function probeAction(): array
     {
         $params = $this->getConfig()->getParameters();
-        $sql = $params['query'] ?? null;
+        $sql = $params['probe'] ?? null;
         if (!is_string($sql) || trim($sql) === '') {
-            throw new UserException("Parameter 'query' is required and must be a non-empty SQL string.");
+            throw new UserException("Parameter 'probe' is required and must be a non-empty SQL string.");
         }
 
         $extractorFactory = new ExtractorFactory($params, $this->getInputState());
@@ -75,7 +75,7 @@ class MySQLApplication extends Application
         try {
             $rows = $extractor->runRawQuery($sql);
         } catch (Throwable $e) {
-            throw new UserException(sprintf('Query failed: %s', $e->getMessage()), 0, $e);
+            throw new UserException(sprintf('Probe failed: %s', $e->getMessage()), 0, $e);
         }
 
         return [

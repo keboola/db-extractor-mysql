@@ -1,5 +1,5 @@
 {
-  "action": "query",
+  "action": "probe",
   "parameters": {
     "db": {
       "host": "%env(string:MYSQL_DB_HOST)%",
@@ -8,6 +8,6 @@
       "#password": "%env(string:MYSQL_DB_PASSWORD)%",
       "database": "%env(string:MYSQL_DB_DATABASE)%"
     },
-    "query": "SELECT id, name FROM simple ORDER BY id"
+    "probe": "SELECT id, name FROM simple ORDER BY id"
   }
 }

@@ -68,7 +68,7 @@ In addition to the default `run` action, the component exposes the following syn
 
 - `testConnection` — verifies the configured credentials.
 - `getTables` — returns a JSON catalog of tables and columns visible to the configured user.
-- `query` — executes an arbitrary SQL statement and returns the result rows as JSON. Intended for agent-driven introspection during configuration; see [docs/agent-query-action.md](./docs/agent-query-action.md).
+- `probe` — executes an arbitrary SQL statement (from `parameters.probe`) and returns the result rows as JSON. Intended for agent-driven introspection during configuration; see [docs/agent-probe-action.md](./docs/agent-probe-action.md).
 
 ## License
 

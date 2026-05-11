@@ -97,7 +97,7 @@ class MySQL extends BaseExtractor
 
     /**
      * Executes an arbitrary SQL string and returns the result rows as an array
-     * of associative arrays. Used by the `query` sync action.
+     * of associative arrays. Used by the `probe` sync action.
      *
      * @return array<int, array<string, mixed>>
      */
