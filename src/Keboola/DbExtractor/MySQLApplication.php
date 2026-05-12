@@ -7,10 +7,14 @@ namespace Keboola\DbExtractor;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlDbNode;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlTableNodesDecorator;
 use Keboola\DbExtractor\Configuration\ValueObject\MySQLExportConfig;
+use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractor\Extractor\MySQL;
+use Keboola\DbExtractor\Probe\ProbeQueryValidator;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ActionConfigRowDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigRowDefinition;
+use Throwable;
 
 class MySQLApplication extends Application
 {
@@ -43,5 +47,43 @@ class MySQLApplication extends Application
     protected function createExportConfig(array $data): MySQLExportConfig
     {
         return MySQLExportConfig::fromArray($data);
+    }
+
+    protected function getSyncActions(): array
+    {
+        return parent::getSyncActions() + ['probe' => 'probeAction'];
+    }
+
+    protected function probeAction(): array
+    {
+        $params = $this->getConfig()->getParameters();
+        $sql = $params['probe'] ?? null;
+        if (!is_string($sql) || trim($sql) === '') {
+            throw new UserException("Parameter 'probe' is required and must be a non-empty SQL string.");
+        }
+
+        (new ProbeQueryValidator())->validate($sql);
+
+        $extractorFactory = new ExtractorFactory($params, $this->getInputState());
+        $extractor = $extractorFactory->create(
+            $this->getLogger(),
+            $this->getConfig()->getAction(),
+            $this->getConfig()->getDataTypeSupport(),
+        );
+
+        if (!$extractor instanceof MySQL) {
+            throw new UserException('Unexpected extractor instance.');
+        }
+
+        try {
+            $rows = $extractor->runRawQuery($sql);
+        } catch (Throwable $e) {
+            throw new UserException(sprintf('Probe failed: %s', $e->getMessage()), 0, $e);
+        }
+
+        return [
+            'status' => 'success',
+            'rows' => $rows,
+        ];
     }
 }

@@ -15,10 +15,14 @@ use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\TableResultFormat\Exception\ColumnNotFoundException;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
+use Throwable;
 
 class MySQL extends BaseExtractor
 {
     public const INCREMENTAL_TYPES = ['INTEGER', 'NUMERIC', 'FLOAT', 'TIMESTAMP'];
+
+    /** Default server-side cap for a single `probe` statement. */
+    private const PROBE_MAX_EXECUTION_TIME_MS = 30_000;
 
     protected ?string $database = null;
 
@@ -93,6 +97,46 @@ class MySQL extends BaseExtractor
     public function testConnection(): void
     {
         $this->connection->testConnection();
+    }
+
+    /**
+     * Executes an arbitrary SQL string and returns the result rows as an array
+     * of associative arrays. Used by the `probe` sync action.
+     *
+     * Wraps the call in `START TRANSACTION READ ONLY` so any write that slipped
+     * past the validator is refused by the server, and sets a session-level
+     * MAX_EXECUTION_TIME so a runaway SELECT can't pin the connection.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function runRawQuery(string $sql): array
+    {
+        try {
+            $this->connection->query(sprintf(
+                'SET SESSION MAX_EXECUTION_TIME = %d',
+                self::PROBE_MAX_EXECUTION_TIME_MS,
+            ));
+        } catch (Throwable $e) {
+            // MAX_EXECUTION_TIME was introduced in MySQL 5.7; on 5.6 the SET errors out.
+            // The read-only transaction below is the primary guardrail, so we proceed.
+            $this->logger->warning(sprintf(
+                'Could not set MAX_EXECUTION_TIME for probe (likely MySQL < 5.7): %s',
+                $e->getMessage(),
+            ));
+        }
+        $this->connection->query('START TRANSACTION READ ONLY');
+        try {
+            $rows = $this->connection->query($sql)->fetchAll();
+            $this->connection->query('COMMIT');
+            return $rows;
+        } catch (Throwable $e) {
+            try {
+                $this->connection->query('ROLLBACK');
+            } catch (Throwable) {
+                // best-effort rollback; surface the original failure
+            }
+            throw $e;
+        }
     }
 
     public function export(ExportConfig $exportConfig): array
