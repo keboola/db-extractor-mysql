@@ -22,6 +22,7 @@
         "keboola/php-datatypes": "^7.2",
         "keboola/php-temp": "^2.0",
         "keboola/php-utils": "^4.1",
+        "phpmyadmin/sql-parser": "^5.10",
         "symfony/config": "^6.3"
     },
     "require-dev": {

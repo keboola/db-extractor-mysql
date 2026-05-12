@@ -68,7 +68,10 @@ In addition to the default `run` action, the component exposes the following syn
 
 - `testConnection` — verifies the configured credentials.
 - `getTables` — returns a JSON catalog of tables and columns visible to the configured user.
-- `probe` — executes an arbitrary SQL statement (from `parameters.probe`) against the configured database and returns the result rows as JSON. Intended for agent-driven introspection during configuration. Response shape: `{"status":"success","rows":[{...}]}`. No server-side row cap and no read-only enforcement — the caller is responsible for including `LIMIT` and avoiding write statements.
+- `probe` — executes a single read-only SQL statement (from `parameters.probe`) against the configured database and returns the result rows as JSON. Intended for agent-driven introspection during configuration. Response shape: `{"status":"success","rows":[{...}]}`.
+    - The statement is parsed with `phpmyadmin/sql-parser` and rejected unless it is a single `SELECT`, `SHOW`, `DESCRIBE`/`DESC`, or `EXPLAIN` (multi-statement input is refused).
+    - It is executed inside `START TRANSACTION READ ONLY` and with session `MAX_EXECUTION_TIME = 30000` so writes are refused by the server and runaway queries are cut off.
+    - There is intentionally no server-side row cap — the caller decides whether to add `LIMIT`.
 
 ## License
 

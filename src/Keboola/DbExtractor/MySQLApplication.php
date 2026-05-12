@@ -9,6 +9,7 @@ use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlTableNodesDecorator;
 use Keboola\DbExtractor\Configuration\ValueObject\MySQLExportConfig;
 use Keboola\DbExtractor\Exception\UserException;
 use Keboola\DbExtractor\Extractor\MySQL;
+use Keboola\DbExtractor\Probe\ProbeQueryValidator;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ActionConfigRowDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
@@ -60,6 +61,8 @@ class MySQLApplication extends Application
         if (!is_string($sql) || trim($sql) === '') {
             throw new UserException("Parameter 'probe' is required and must be a non-empty SQL string.");
         }
+
+        (new ProbeQueryValidator())->validate($sql);
 
         $extractorFactory = new ExtractorFactory($params, $this->getInputState());
         $extractor = $extractorFactory->create(
