@@ -111,7 +111,19 @@ class MySQL extends BaseExtractor
      */
     public function runRawQuery(string $sql): array
     {
-        $this->connection->query(sprintf('SET SESSION MAX_EXECUTION_TIME = %d', self::PROBE_MAX_EXECUTION_TIME_MS));
+        try {
+            $this->connection->query(sprintf(
+                'SET SESSION MAX_EXECUTION_TIME = %d',
+                self::PROBE_MAX_EXECUTION_TIME_MS,
+            ));
+        } catch (Throwable $e) {
+            // MAX_EXECUTION_TIME was introduced in MySQL 5.7; on 5.6 the SET errors out.
+            // The read-only transaction below is the primary guardrail, so we proceed.
+            $this->logger->warning(sprintf(
+                'Could not set MAX_EXECUTION_TIME for probe (likely MySQL < 5.7): %s',
+                $e->getMessage(),
+            ));
+        }
         $this->connection->query('START TRANSACTION READ ONLY');
         try {
             $rows = $this->connection->query($sql)->fetchAll();
