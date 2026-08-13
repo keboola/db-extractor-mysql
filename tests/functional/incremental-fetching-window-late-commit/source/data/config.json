@@ -1,0 +1,24 @@
+{
+  "parameters": {
+    "id": 3,
+    "enabled": true,
+    "name": "incremental-window-late-commit",
+    "outputTable": "in.c-main.incremental-window-late-commit",
+    "incremental": true,
+    "incrementalFetchingColumn": "ts",
+    "incrementalFetchingMode": "window",
+    "incrementalFetchingStart": "2000-01-01",
+    "primaryKey": ["id"],
+    "table": {
+      "schema": "test",
+      "tableName": "incremental_window_late_commit"
+    },
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+}

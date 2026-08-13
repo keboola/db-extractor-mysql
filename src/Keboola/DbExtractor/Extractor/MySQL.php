@@ -111,6 +111,21 @@ class MySQL extends BaseExtractor
 
         if ($exportConfig->isIncrementalFetching()) {
             $this->validateIncrementalFetching($exportConfig);
+
+            // Thread the resolved incremental column type into the config so the adapter's query factory
+            // can compute the window range / lookback lower bound (mirrors db-extractor-common's
+            // BaseExtractor::export(), which this method overrides for the schema/database match check).
+            if ($exportConfig->hasIncrementalFetchingBounds()) {
+                $columnType = $this->getIncrementalFetchingColumnType($exportConfig);
+                if ($columnType === null) {
+                    throw new UserException(
+                        'Incremental fetching window/lookback is not supported by this extractor.',
+                    );
+                }
+                $exportConfig = $exportConfig->withIncrementalColumnType($columnType);
+                $this->guardIncrementalFetchingOverlap($exportConfig);
+            }
+
             $maxValue = $this->canFetchMaxIncrementalValueSeparately($exportConfig) ?
                 $this->getMaxOfIncrementalFetchingColumn($exportConfig) : null;
         } else {
@@ -137,6 +152,26 @@ class MySQL extends BaseExtractor
 
     public function validateIncrementalFetching(ExportConfig $exportConfig): void
     {
+        $type = $this->getIncrementalFetchingColumnType($exportConfig);
+
+        if (!in_array($type, self::INCREMENTAL_TYPES, true)) {
+            throw new UserException(sprintf(
+                'Column "%s" specified for incremental fetching has unexpected type "%s", expected: "%s".',
+                $exportConfig->getIncrementalFetchingColumn(),
+                $type,
+                implode('", "', self::INCREMENTAL_TYPES),
+            ));
+        }
+    }
+
+    /**
+     * Detects the basetype (e.g. "TIMESTAMP", "INTEGER", "NUMERIC", "FLOAT") of the incremental fetching
+     * column. Overrides the default-null hook in db-extractor-common's BaseExtractor, opting MySQL into
+     * the incremental fetching WINDOW/LOOKBACK feature (the type is needed to resolve relative/absolute
+     * bounds). Also reused by validateIncrementalFetching() for the INCREMENTAL_TYPES check.
+     */
+    public function getIncrementalFetchingColumnType(ExportConfig $exportConfig): ?string
+    {
         try {
             $column = $this
                 ->getMetadataProvider()
@@ -154,7 +189,6 @@ class MySQL extends BaseExtractor
 
         try {
             $datatype = new MysqlDatatype($column->getType());
-            $type = $datatype->getBasetype();
         } catch (InvalidLengthException $e) {
             throw new UserException(
                 sprintf(
@@ -164,14 +198,7 @@ class MySQL extends BaseExtractor
             );
         }
 
-        if (!in_array($type, self::INCREMENTAL_TYPES, true)) {
-            throw new UserException(sprintf(
-                'Column "%s" specified for incremental fetching has unexpected type "%s", expected: "%s".',
-                $exportConfig->getIncrementalFetchingColumn(),
-                $datatype->getBasetype(),
-                implode('", "', self::INCREMENTAL_TYPES),
-            ));
-        }
+        return $datatype->getBasetype();
     }
 
     public function getMaxOfIncrementalFetchingColumn(ExportConfig $exportConfig): ?string
