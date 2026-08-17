@@ -1,0 +1,23 @@
+{
+  "parameters": {
+    "id": 5,
+    "enabled": true,
+    "name": "incremental-lookback-timestamp-late-commit",
+    "outputTable": "in.c-main.incremental-lookback-timestamp-late-commit",
+    "incremental": true,
+    "incrementalFetchingColumn": "ts",
+    "incrementalFetchingLookback": "10 minutes",
+    "primaryKey": ["id"],
+    "table": {
+      "schema": "test",
+      "tableName": "incremental_lookback_ts"
+    },
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+}
