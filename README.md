@@ -58,6 +58,10 @@ The extraction has the following configuration options:
 - primaryKey: array of strings (optional)
 - incrementalFetchingColumn: string (optional)
 - incrementalFetchingLimit: integer (optional)
+- incrementalFetchingMode: enum (optional) - `watermark` (default) or `window`. `watermark` resumes from the last fetched value; `window` fetches a fixed range and ignores the stored watermark.
+- incrementalFetchingLookback: string (optional, `watermark` mode only) - re-fetch this far behind the last fetched value so rows committed below the watermark ("late commits") are not missed. A duration like `20 minutes` for timestamp columns, or a number for numeric columns. A primary key is required so incremental loading can deduplicate the re-fetched rows.
+- incrementalFetchingStart: string (optional, `window` mode only) - lower bound of the fetched range, absolute or relative (e.g. `2024-01-01` or `-2 days` for timestamp columns, a number for numeric columns).
+- incrementalFetchingEnd: string (optional, `window` mode only) - upper bound of the fetched range (same formats as `incrementalFetchingStart`).
 - enabled: boolean (optional)
 - retries: integer (optional) number of times to retry failures
 - convertBin2hex: boolean (optional) convert binary fields to hex (table option must be configured)
