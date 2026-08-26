@@ -1,0 +1,1 @@
+Incremental fetching window "end" is set to an absolute value. Rows committed after this point in time will never be fetched by future incremental runs. This is expected for a one-off or segmented backfill, but not for ongoing incremental synchronization.

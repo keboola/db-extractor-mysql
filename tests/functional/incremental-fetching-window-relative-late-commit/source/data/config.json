@@ -1,0 +1,24 @@
+{
+  "parameters": {
+    "id": 6,
+    "enabled": true,
+    "name": "incremental-window-relative-late-commit",
+    "outputTable": "in.c-main.incremental-window-relative-late-commit",
+    "incremental": true,
+    "incrementalFetchingColumn": "ts",
+    "incrementalFetchingMode": "window",
+    "incrementalFetchingStart": "-100 years",
+    "primaryKey": ["id"],
+    "table": {
+      "schema": "test",
+      "tableName": "incremental_window_relative"
+    },
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+}

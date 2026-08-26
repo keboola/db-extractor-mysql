@@ -1,0 +1,25 @@
+{
+  "parameters": {
+    "id": 7,
+    "enabled": true,
+    "name": "incremental-window-numeric",
+    "outputTable": "in.c-main.incremental-window-numeric",
+    "incremental": true,
+    "incrementalFetchingColumn": "seq",
+    "incrementalFetchingMode": "window",
+    "incrementalFetchingStart": "900",
+    "incrementalFetchingEnd": "1050",
+    "primaryKey": ["id"],
+    "table": {
+      "schema": "test",
+      "tableName": "incremental_window_numeric"
+    },
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+}
