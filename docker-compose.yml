@@ -47,7 +47,9 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      # headroom for MySQL 9.x --upgrade=FORCE + TLS first-boot under CI load
+      start_period: 60s
 
   mysql-ssl:
     image: mysql:${MYSQL_VERSION}
@@ -63,7 +65,9 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
+      # headroom for MySQL 9.x --upgrade=FORCE + TLS first-boot under CI load
+      start_period: 60s
 
   sshproxy:
     image: keboola/db-component-ssh-proxy:latest
