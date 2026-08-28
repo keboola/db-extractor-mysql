@@ -65,6 +65,26 @@ The extraction has the following configuration options:
 - enabled: boolean (optional)
 - retries: integer (optional) number of times to retry failures
 - convertBin2hex: boolean (optional) convert binary fields to hex (table option must be configured)
+- propagateDescriptions: boolean (optional, default `true`) copy the MySQL table and column `COMMENT` values into the Storage table and column descriptions
+
+## Table and column descriptions
+
+By default the extractor reads the `COMMENT` attribute of the extracted table and of all its
+columns on every run, and writes the values to the description of the corresponding table and
+columns in Storage. Set `propagateDescriptions` to `false` to turn this off -- no descriptions
+are then written at all.
+
+MySQL returns an empty string for a table or column without a `COMMENT`, which is reported as
+no description rather than as an empty one.
+
+Views never get a table description. MySQL has no syntax for commenting a view and reports the
+literal string `VIEW` in `INFORMATION_SCHEMA.TABLES.TABLE_COMMENT` for every one of them, which
+is not a user value. Columns of a view do get descriptions -- MySQL copies the comments over
+from the underlying table.
+
+Descriptions are only available when a table is configured via `table`. In advanced query mode
+(`query`) the column list comes from the query result itself, which carries no comments, so
+nothing is propagated.
 
 ## License
 

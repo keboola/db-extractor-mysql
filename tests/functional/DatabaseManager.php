@@ -6,6 +6,7 @@ namespace Keboola\DbExtractor\FunctionalTests;
 
 use Keboola\DbExtractor\TraitTests\Tables\AutoIncrementTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\BinaryNullableTrait;
+use Keboola\DbExtractor\TraitTests\Tables\CommentsTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\EmojiTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\EscapingTableTrait;
 use Keboola\DbExtractor\TraitTests\Tables\SalesTableTrait;
@@ -20,6 +21,7 @@ class DatabaseManager
     use EscapingTableTrait;
     use EmojiTableTrait;
     use BinaryNullableTrait;
+    use CommentsTableTrait;
 
     protected PDO $connection;
 

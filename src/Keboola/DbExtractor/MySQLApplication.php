@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor;
 
+use Keboola\DbExtractor\Configuration\MysqlConfigRowDefinition;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlDbNode;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlTableNodesDecorator;
 use Keboola\DbExtractor\Configuration\ValueObject\MySQLExportConfig;
 use Keboola\DbExtractorConfig\Config;
 use Keboola\DbExtractorConfig\Configuration\ActionConfigRowDefinition;
 use Keboola\DbExtractorConfig\Configuration\ConfigDefinition;
-use Keboola\DbExtractorConfig\Configuration\ConfigRowDefinition;
 
 class MySQLApplication extends Application
 {
@@ -27,7 +27,7 @@ class MySQLApplication extends Application
             if ($action === 'run') {
                 $this->config = new Config(
                     $config,
-                    new ConfigRowDefinition($dbNode, null, null, new MysqlTableNodesDecorator()),
+                    new MysqlConfigRowDefinition($dbNode, null, null, new MysqlTableNodesDecorator()),
                 );
             } else {
                 $this->config = new Config($config, new ActionConfigRowDefinition($dbNode));
