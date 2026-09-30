@@ -1,0 +1,21 @@
+{
+  "parameters": {
+    "id": 1,
+    "enabled": true,
+    "name": "comments",
+    "outputTable": "in.c-main.comments",
+    "incremental": false,
+    "primaryKey": null,
+    "table": {
+      "schema": "test",
+      "tableName": "comments"
+    },
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  }
+}

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Tests;
 
+use Keboola\DbExtractor\Configuration\MysqlConfigRowDefinition;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlDbNode;
 use Keboola\DbExtractor\Configuration\NodeDefinition\MysqlTableNodesDecorator;
 use Keboola\DbExtractorConfig\Config;
@@ -194,6 +195,54 @@ class ConfigTest extends TestCase
                         'extractor_class' => 'MySQL',
                     ],
                 ],
+            ],
+        ];
+    }
+
+    public function testPropagateDescriptionsDefaultsToEnabled(): void
+    {
+        $config = new Config($this->getTableRowConfig(), $this->createRowDefinition());
+
+        $this->assertTrue($config->getParameters()['propagateDescriptions']);
+    }
+
+    public function testPropagateDescriptionsCanBeDisabled(): void
+    {
+        $rawConfig = $this->getTableRowConfig();
+        $rawConfig['parameters']['propagateDescriptions'] = false;
+
+        $config = new Config($rawConfig, $this->createRowDefinition());
+
+        $this->assertFalse($config->getParameters()['propagateDescriptions']);
+    }
+
+    private function createRowDefinition(): MysqlConfigRowDefinition
+    {
+        return new MysqlConfigRowDefinition(
+            new MysqlDbNode(),
+            null,
+            null,
+            new MysqlTableNodesDecorator(),
+        );
+    }
+
+    private function getTableRowConfig(): array
+    {
+        return [
+            'parameters' => [
+                'db' => [
+                    'host' => 'mysql',
+                    'user' => 'root',
+                    '#password' => 'rootpassword',
+                    'port' => 3306,
+                ],
+                'table' => [
+                    'schema' => 'test',
+                    'tableName' => 'escaping',
+                ],
+                'outputTable' => 'in.c-main.escaping',
+                'data_dir' => '/tmp/testDatadir',
+                'extractor_class' => 'MySQL',
             ],
         ];
     }

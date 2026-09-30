@@ -23,10 +23,17 @@ class MySQLMetadataProvider implements MetadataProvider
 
     private ?string $database;
 
-    public function __construct(PdoConnection $connection, ?string $database)
-    {
+    /** If false, table and column COMMENTs are not propagated as Storage descriptions */
+    private bool $propagateDescriptions;
+
+    public function __construct(
+        PdoConnection $connection,
+        ?string $database,
+        bool $propagateDescriptions = true,
+    ) {
         $this->connection = $connection;
         $this->database = $database; // database is optional
+        $this->propagateDescriptions = $propagateDescriptions;
     }
 
     public function getTable(InputTable $table): Table
@@ -101,10 +108,30 @@ class MySQLMetadataProvider implements MetadataProvider
     {
         $builder
             ->setName($data['TABLE_NAME'])
-            ->setDescription($data['TABLE_COMMENT'] ?? null)
             ->setSchema($data['TABLE_SCHEMA'])
             ->setType($data['TABLE_TYPE'])
             ->setRowCount((int) $data['TABLE_ROWS']);
+
+        if ($this->propagateDescriptions) {
+            // Empty string and null are both normalized to "no description" by the builder
+            $builder->setDescription($this->getTableComment($data));
+        }
+    }
+
+    /**
+     * MySQL has no syntax for commenting a view and reports the literal string "VIEW" in
+     * INFORMATION_SCHEMA.TABLES.TABLE_COMMENT for every one of them (verified on MySQL 5.6,
+     * 8.4 and 9.1). Taking that value would give every extracted view the description "VIEW",
+     * so views are reported as having no table description at all. Their columns keep the
+     * comments MySQL copies over from the underlying table.
+     */
+    private function getTableComment(array $data): ?string
+    {
+        if (str_contains((string) $data['TABLE_TYPE'], 'VIEW')) {
+            return null;
+        }
+
+        return $data['TABLE_COMMENT'] ?? null;
     }
 
     private function processColumnData(ColumnBuilder $builder, array $data, ?int $autoIncrement): void
@@ -112,12 +139,17 @@ class MySQLMetadataProvider implements MetadataProvider
         // Basic values
         $builder
             ->setName($data['COLUMN_NAME'])
-            ->setDescription($data['COLUMN_COMMENT'])
             ->setOrdinalPosition((int) $data['ORDINAL_POSITION'])
             ->setType($data['DATA_TYPE'])
             ->setPrimaryKey($data['COLUMN_KEY'] === 'PRI')
             ->setUniqueKey($data['COLUMN_KEY'] === 'UNI')
             ->setNullable($data['IS_NULLABLE'] === 'YES');
+
+        if ($this->propagateDescriptions) {
+            // MySQL returns an empty string for a column without a COMMENT,
+            // which the builder normalizes to "no description"
+            $builder->setDescription($data['COLUMN_COMMENT']);
+        }
 
         // Default value, if IS_NULLABLE is NO and COLUMN_DEFAULT is null => it means no default value
         if ($data['IS_NULLABLE'] === 'YES' || $data['COLUMN_DEFAULT'] !== null) {

@@ -129,6 +129,10 @@ class MySQLTest extends TestCase
                     'value' => false,
                 ],
                 [
+                    'key' => 'KBC.description',
+                    'value' => 'This is a weird ID',
+                ],
+                [
                     'key' => 'KBC.datatype.basetype',
                     'value' => 'INTEGER',
                 ],
@@ -165,6 +169,10 @@ class MySQLTest extends TestCase
                 [
                     'key' => 'KBC.datatype.nullable',
                     'value' => false,
+                ],
+                [
+                    'key' => 'KBC.description',
+                    'value' => 'This is a weird name',
                 ],
                 [
                     'key' => 'KBC.datatype.basetype',
@@ -225,6 +233,10 @@ class MySQLTest extends TestCase
                 [
                     'key' => 'KBC.datatype.nullable',
                     'value' => true,
+                ],
+                [
+                    'key' => 'KBC.description',
+                    'value' => 'This is a foreign key',
                 ],
                 [
                     'key' => 'KBC.datatype.basetype',
