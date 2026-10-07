@@ -59,11 +59,6 @@ class MySQLDbConnection extends PdoConnection
         return new RetryProxy($retryPolicy, $backoffPolicy, $this->logger);
     }
 
-    protected function getQueryMetadata(string $query, PDOStatement $stmt): QueryMetadata
-    {
-        return new MySQLQueryMetadata($stmt);
-    }
-
     protected function doQuery(string $query): QueryResult
     {
         /** @var PDOStatement $stmt */

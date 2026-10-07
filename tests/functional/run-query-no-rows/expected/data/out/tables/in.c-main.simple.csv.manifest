@@ -15,7 +15,7 @@
             },
             {
                 "key": "KBC.datatype.basetype",
-                "value": "INTEGER"
+                "value": "string"
             },
             {
                 "key": "KBC.sourceName",

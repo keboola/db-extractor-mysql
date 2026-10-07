@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\DbExtractor\Extractor;
 
-use Keboola\DbExtractor\Adapter\Exception\InvalidStateException;
 use Keboola\DbExtractor\Adapter\ValueObject\QueryMetadata;
 use Keboola\DbExtractor\TableResultFormat\Metadata\Builder\ColumnBuilder;
 use Keboola\DbExtractor\TableResultFormat\Metadata\ValueObject\ColumnCollection;
-use PDOStatement;
 
 class MySQLQueryMetadata implements QueryMetadata
 {
@@ -23,19 +21,26 @@ class MySQLQueryMetadata implements QueryMetadata
         'NEWDATE' => 'DATE',
     ];
 
-    private PDOStatement $stmt;
+    private QueryMetadata $pdoQueryMetadata;
 
     private ?ColumnCollection $columns = null;
 
-    public function __construct(PDOStatement $stmt)
+    public function __construct(QueryMetadata $pdoQueryMetadata)
     {
-        $this->stmt = $stmt;
+        $this->pdoQueryMetadata = $pdoQueryMetadata;
     }
 
     public function getColumns(): ColumnCollection
     {
         if (!$this->columns) {
-            $this->columns = $this->doGetColumns();
+            $columns = [];
+            foreach ($this->pdoQueryMetadata->getColumns() as $column) {
+                $columns[] = ColumnBuilder::create()
+                    ->setName($column->getName())
+                    ->setType(self::mapNativeType($column->getType()))
+                    ->build();
+            }
+            $this->columns = new ColumnCollection($columns);
         }
 
         return $this->columns;
@@ -44,26 +49,5 @@ class MySQLQueryMetadata implements QueryMetadata
     public static function mapNativeType(string $nativeType): string
     {
         return self::NATIVE_TYPE_TO_SQL_TYPE[strtoupper($nativeType)] ?? $nativeType;
-    }
-
-    private function doGetColumns(): ColumnCollection
-    {
-        $columnsCount = $this->stmt->columnCount();
-        $columns = [];
-        for ($i = 0; $i < $columnsCount; $i++) {
-            /** @var array $columnMetadata */
-            $columnMetadata = $this->stmt->getColumnMeta($i);
-
-            if (!isset($columnMetadata['name'])) {
-                throw new InvalidStateException('Missing key "name" in PDO query column\'s metadata.');
-            }
-
-            $builder = ColumnBuilder::create();
-            $builder->setName($columnMetadata['name']);
-            $builder->setType(self::mapNativeType((string) ($columnMetadata['native_type'] ?? 'string')));
-            $columns[] = $builder->build();
-        }
-
-        return new ColumnCollection($columns);
     }
 }

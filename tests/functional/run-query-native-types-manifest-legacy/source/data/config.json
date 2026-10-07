@@ -7,7 +7,6 @@
     "incremental": false,
     "primaryKey": [],
     "enabled": true,
-    "queryNativeTypes": true,
     "db": {
       "host": "%env(string:MYSQL_DB_HOST)%",
       "port": "%env(string:MYSQL_DB_PORT)%",

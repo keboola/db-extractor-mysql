@@ -12,7 +12,9 @@ use Keboola\DbExtractor\Adapter\Query\DefaultQueryFactory;
 use Keboola\DbExtractor\Configuration\ValueObject\MysqlDatabaseConfig;
 use Keboola\DbExtractor\Exception\ApplicationException;
 use Keboola\DbExtractor\Exception\UserException;
+use Keboola\DbExtractor\Manifest\ManifestGenerator;
 use Keboola\DbExtractor\TableResultFormat\Exception\ColumnNotFoundException;
+use Keboola\DbExtractor\TableResultFormat\Metadata\Manifest\DefaultManifestSerializer;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\DatabaseConfig;
 use Keboola\DbExtractorConfig\Configuration\ValueObject\ExportConfig;
 
@@ -32,6 +34,15 @@ class MySQL extends BaseExtractor
             // Not declared for sync actions and legacy configs, both of which keep
             // unknown keys, so reading it straight from parameters is safe
             (bool) ($this->parameters['propagateDescriptions'] ?? true),
+        );
+    }
+
+    protected function createManifestGenerator(): ManifestGenerator
+    {
+        return new MySQLManifestGenerator(
+            $this->getMetadataProvider(),
+            new DefaultManifestSerializer(),
+            $this->parameters['extractor_class'],
         );
     }
 
