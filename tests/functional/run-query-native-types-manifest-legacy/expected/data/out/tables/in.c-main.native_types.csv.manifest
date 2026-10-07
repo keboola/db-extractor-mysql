@@ -1,0 +1,261 @@
+{
+    "destination": "in.c-main.native_types",
+    "incremental": false,
+    "schema": [
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_tinyint",
+                "KBC.sanitizedName": "c_tinyint",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_tinyint",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_smallint",
+                "KBC.sanitizedName": "c_smallint",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_smallint",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_mediumint",
+                "KBC.sanitizedName": "c_mediumint",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_mediumint",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "renamed_int",
+                "KBC.sanitizedName": "renamed_int",
+                "KBC.uniqueKey": false
+            },
+            "name": "renamed_int",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_bigint",
+                "KBC.sanitizedName": "c_bigint",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_bigint",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_cast_signed",
+                "KBC.sanitizedName": "c_cast_signed",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_cast_signed",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_decimal",
+                "KBC.sanitizedName": "c_decimal",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_decimal",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_float",
+                "KBC.sanitizedName": "c_float",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_float",
+            "data_type": {
+                "base": {
+                    "type": "FLOAT"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_double",
+                "KBC.sanitizedName": "c_double",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_double",
+            "data_type": {
+                "base": {
+                    "type": "FLOAT"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_varchar",
+                "KBC.sanitizedName": "c_varchar",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_varchar",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_char",
+                "KBC.sanitizedName": "c_char",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_char",
+            "data_type": {
+                "base": {
+                    "type": "string"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_text",
+                "KBC.sanitizedName": "c_text",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_text",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_date",
+                "KBC.sanitizedName": "c_date",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_date",
+            "data_type": {
+                "base": {
+                    "type": "DATE"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_datetime",
+                "KBC.sanitizedName": "c_datetime",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_datetime",
+            "data_type": {
+                "base": {
+                    "type": "TIMESTAMP"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_timestamp",
+                "KBC.sanitizedName": "c_timestamp",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_timestamp",
+            "data_type": {
+                "base": {
+                    "type": "TIMESTAMP"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_time",
+                "KBC.sanitizedName": "c_time",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_time",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                }
+            }
+        },
+        {
+            "nullable": true,
+            "primary_key": false,
+            "metadata": {
+                "KBC.sourceName": "c_year",
+                "KBC.sanitizedName": "c_year",
+                "KBC.uniqueKey": false
+            },
+            "name": "c_year",
+            "data_type": {
+                "base": {
+                    "type": "STRING"
+                }
+            }
+        }
+    ]
+}
