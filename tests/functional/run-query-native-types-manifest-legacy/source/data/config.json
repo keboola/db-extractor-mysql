@@ -1,0 +1,23 @@
+{
+  "parameters": {
+    "id": 1,
+    "name": "native_types",
+    "query": "SELECT c_tinyint, c_smallint, c_mediumint, c_int AS renamed_int, c_bigint, CAST(c_int AS SIGNED) AS c_cast_signed, c_decimal, c_float, c_double, c_varchar, c_char, c_text, c_date, c_datetime, c_timestamp, c_time, c_year FROM native_types",
+    "outputTable": "in.c-main.native_types",
+    "incremental": false,
+    "primaryKey": [],
+    "enabled": true,
+    "db": {
+      "host": "%env(string:MYSQL_DB_HOST)%",
+      "port": "%env(string:MYSQL_DB_PORT)%",
+      "user": "%env(string:MYSQL_DB_USER)%",
+      "#password": "%env(string:MYSQL_DB_PASSWORD)%",
+      "database": "%env(string:MYSQL_DB_DATABASE)%"
+    }
+  },
+  "storage": {
+    "output": {
+      "data_type_support": "authoritative"
+    }
+  }
+}

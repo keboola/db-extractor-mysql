@@ -65,6 +65,7 @@ The extraction has the following configuration options:
 - enabled: boolean (optional)
 - retries: integer (optional) number of times to retry failures
 - convertBin2hex: boolean (optional) convert binary fields to hex (table option must be configured)
+- queryNativeTypes: boolean (optional, default `false`) for custom queries, send `INTEGER` / `NUMERIC` base types for integer and decimal columns instead of `STRING`. An existing typed output table keeps its `STRING` columns, so recreate it after enabling. `BIGINT UNSIGNED` values above 2^63-1 do not fit an `INTEGER` column.
 - propagateDescriptions: boolean (optional, default `true`) copy the MySQL table and column `COMMENT` values into the Storage table and column descriptions
 
 ## Table and column descriptions

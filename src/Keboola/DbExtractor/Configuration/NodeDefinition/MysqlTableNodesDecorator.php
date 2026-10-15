@@ -16,5 +16,6 @@ class MysqlTableNodesDecorator extends TableNodesDecorator
         //Backwards compatibility with old configurations. Not used
         $builder->booleanNode('advancedMode')->end();
         $builder->booleanNode('convertBin2hex')->defaultFalse()->end();
+        $builder->booleanNode('queryNativeTypes')->defaultFalse()->end();
     }
 }

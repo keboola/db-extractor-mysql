@@ -12,6 +12,8 @@ class MySQLExportConfig extends ExportConfig
 {
     private bool $convertBin2hex;
 
+    private bool $queryNativeTypes;
+
     public static function fromArray(array $data): self
     {
         return new self(
@@ -26,6 +28,7 @@ class MySQLExportConfig extends ExportConfig
             $data['primaryKey'],
             $data['retries'],
             $data['convertBin2hex'],
+            $data['queryNativeTypes'] ?? false,
         );
     }
 
@@ -41,6 +44,7 @@ class MySQLExportConfig extends ExportConfig
         array $primaryKey,
         int $maxRetries,
         bool $convertBin2hex,
+        bool $queryNativeTypes = false,
     ) {
         parent::__construct(
             $configId,
@@ -56,10 +60,16 @@ class MySQLExportConfig extends ExportConfig
         );
 
         $this->convertBin2hex = $convertBin2hex;
+        $this->queryNativeTypes = $queryNativeTypes;
     }
 
     public function hasConvertBin2hex(): bool
     {
         return $this->convertBin2hex;
+    }
+
+    public function hasQueryNativeTypes(): bool
+    {
+        return $this->queryNativeTypes;
     }
 }
