@@ -59,6 +59,8 @@ jobs:
       fail-fast: false
       matrix:
         mysql: [ 9.1, 8, 5.6 ]
+    env:
+      MYSQL_VERSION: ${{ matrix.mysql }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -72,10 +74,16 @@ jobs:
           tag: ${{ needs.build.outputs.app_image_tag }}
           target_image: ${{ env.APP_IMAGE}}
           tag_as_latest: true
-      - name: Run tests
+      # on the runner, `docker compose run` started the DBs without waiting for depends_on health
+      - name: Start DB services
         run: |
-          export MYSQL_VERSION="${{ matrix.mysql }}"
-          docker compose run app
+          docker compose version
+          docker compose up -d --wait --wait-timeout 300 mysql mysql-ssl sshproxy
+      - name: Run tests
+        run: docker compose run --rm app
+      - name: DB logs on failure
+        if: failure()
+        run: docker compose logs --timestamps mysql mysql-ssl
 
   tests-in-kbc:
     needs: build
