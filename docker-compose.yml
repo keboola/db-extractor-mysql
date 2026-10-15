@@ -44,7 +44,8 @@ services:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      # TCP, not the socket: the entrypoint's temporary init server answers on the socket with networking off
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--protocol=TCP" ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -62,7 +63,8 @@ services:
       MYSQL_DATABASE: test
       MYSQL_ROOT_PASSWORD: rootpassword
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      # TCP, not the socket: the entrypoint's temporary init server answers on the socket with networking off
+      test: [ "CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--protocol=TCP" ]
       interval: 10s
       timeout: 5s
       retries: 10
